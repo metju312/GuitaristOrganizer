@@ -1,6 +1,6 @@
-package pl.edu.wat.wcy;
+package pl.edu.wat.wcy.pz;
 
-import pl.edu.wat.wcy.view.MainWindow;
+import pl.edu.wat.wcy.pz.view.MainWindow;
 
 import javax.swing.*;
 

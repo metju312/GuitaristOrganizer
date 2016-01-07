@@ -1,4 +1,4 @@
-package pl.edu.wat.wcy.view;
+package pl.edu.wat.wcy.pz.controller;
 
 import javazoom.jl.decoder.JavaLayerException;
 import javazoom.jl.player.Player;
@@ -26,7 +26,9 @@ public class MP3Player {
             songTotalLength = fileInputStream.available();
 
             songPath = path + "";
-        } catch (JavaLayerException | IOException e) {
+        } catch (JavaLayerException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
@@ -73,7 +75,9 @@ public class MP3Player {
             if (pauseLocation != 0) {
                 fileInputStream.skip(songTotalLength - pauseLocation);
             }
-        } catch (JavaLayerException | IOException e) {
+        } catch (JavaLayerException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
 

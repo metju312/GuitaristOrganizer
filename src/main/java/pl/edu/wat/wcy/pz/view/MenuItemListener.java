@@ -1,4 +1,4 @@
-package pl.edu.wat.wcy.view;
+package pl.edu.wat.wcy.pz.view;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
