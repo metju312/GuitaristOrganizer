@@ -8,6 +8,7 @@ import java.awt.*;
 import java.util.List;
 
 public class SongsPanel extends JPanel {
+    private MainWindow mainWindow;
 
     private DefaultListModel listModel;
     private List<Song> songList;
@@ -16,7 +17,8 @@ public class SongsPanel extends JPanel {
     private Song actualSong;
     private JToolBar toolBar;
 
-    public SongsPanel() {
+    public SongsPanel(MainWindow mainWindow) {
+        this.mainWindow = mainWindow;
         setLayout(new BorderLayout());
         generateAndAddToolBar();
         generateSongList();
@@ -30,7 +32,7 @@ public class SongsPanel extends JPanel {
 
 
     private void generateAndAddToolBar() {
-        toolBar = new JToolBar("Songs toolBar");
+        toolBar = new JToolBar("Songs ToolBar");
         JLabel label = new JLabel("Songs");
         toolBar.add(label);
         toolBar.setFloatable(false);
@@ -72,4 +74,7 @@ public class SongsPanel extends JPanel {
         songDao.create(song);
     }
 
+    public void drawAllSongs() {
+
+    }
 }

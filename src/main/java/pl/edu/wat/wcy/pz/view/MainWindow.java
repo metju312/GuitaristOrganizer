@@ -1,10 +1,11 @@
 package pl.edu.wat.wcy.pz.view;
 
-import pl.edu.wat.wcy.pz.model.dao.SongDao;
-import pl.edu.wat.wcy.pz.model.entities.music.Song;
+import com.sun.glass.events.KeyEvent;
+import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 
 public class MainWindow extends JFrame{
     private static MainWindow instance = null;
@@ -12,13 +13,17 @@ public class MainWindow extends JFrame{
     public int mainWindowWidth = 500;
     public int mainWindowHeight = 500;
 
+    private MenuBar menuBar;
+
     private SearchToolBar searchToolBar;
-    private ArtistsPanel artistsPanel;
-    private SongsPanel songsPanel;
+    public ArtistsPanel artistsPanel;
+    public SongsPanel songsPanel;
     private ListPanel listPanel;
 
     private JSplitPane horizontalSplitPane;
     private JSplitPane verticalSplitPane;
+
+    private JPanel toolBarsPanel;
 
     public static MainWindow getInstance() {
         if (instance == null) {
@@ -33,8 +38,11 @@ public class MainWindow extends JFrame{
         setMainWindowValues();
         setMainWindowLayout();
 
-        generateSearchToolBar();
-        getContentPane().add(searchToolBar,BorderLayout.NORTH);
+        generateMenuBar();
+        setJMenuBar(menuBar);
+
+        generateToolBarsPanel();
+        getContentPane().add(toolBarsPanel, BorderLayout.NORTH);
 
         generateArtistsPanel();
         generateSonsPanel();
@@ -44,6 +52,14 @@ public class MainWindow extends JFrame{
         generateVerticalSplitPane();
 
         getContentPane().add(verticalSplitPane, BorderLayout.CENTER);
+    }
+
+    private void generateToolBarsPanel() {
+        toolBarsPanel = new JPanel();
+        toolBarsPanel.setLayout(new BorderLayout());
+
+        generateSearchToolBar();
+        toolBarsPanel.add(searchToolBar, BorderLayout.SOUTH);
     }
 
     private void generateVerticalSplitPane() {
@@ -64,11 +80,11 @@ public class MainWindow extends JFrame{
     }
 
     private void generateSonsPanel() {
-        songsPanel = new SongsPanel();
+        songsPanel = new SongsPanel(this);
     }
 
     private void generateArtistsPanel() {
-        artistsPanel = new ArtistsPanel();
+        artistsPanel = new ArtistsPanel(this);
     }
 
     private void generateSearchToolBar() {
@@ -102,5 +118,9 @@ public class MainWindow extends JFrame{
         } catch (UnsupportedLookAndFeelException e) {
             e.printStackTrace();
         }
+    }
+
+    private void generateMenuBar() {
+        menuBar = new MenuBar(this);
     }
 }
