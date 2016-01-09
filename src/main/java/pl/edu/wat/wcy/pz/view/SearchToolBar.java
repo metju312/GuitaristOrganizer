@@ -9,6 +9,7 @@ import org.apache.tika.parser.mp3.Mp3Parser;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
+import pl.edu.wat.wcy.pz.controller.BrowserSearcher;
 import pl.edu.wat.wcy.pz.model.dao.WebsiteDao;
 import pl.edu.wat.wcy.pz.model.entities.web.Website;
 
@@ -47,7 +48,8 @@ public class SearchToolBar extends JToolBar {
         button.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                //TODO - search title or artist in browser
+                BrowserSearcher browserSearcher = new BrowserSearcher();
+                browserSearcher.searchString(textField.getText());
             }
         });
         add(button);
@@ -82,7 +84,7 @@ public class SearchToolBar extends JToolBar {
     }
 
     private void addTextField(int length) {
-        JTextField textField = new JTextField(length);
+        textField = new JTextField(length);
         add(textField);
     }
 
