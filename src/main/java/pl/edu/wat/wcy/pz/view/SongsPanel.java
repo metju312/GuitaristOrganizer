@@ -1,15 +1,10 @@
 package pl.edu.wat.wcy.pz.view;
 
-import pl.edu.wat.wcy.pz.controller.MP3Parser;
-import pl.edu.wat.wcy.pz.model.dao.FolderDao;
 import pl.edu.wat.wcy.pz.model.dao.SongDao;
-import pl.edu.wat.wcy.pz.model.entities.music.Folder;
 import pl.edu.wat.wcy.pz.model.entities.music.Song;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 public class SongsPanel extends JPanel {
@@ -28,14 +23,17 @@ public class SongsPanel extends JPanel {
         setLayout(new BorderLayout());
         generateToolBar();
         add(toolBar, BorderLayout.NORTH);
+
+        generateRestOfComponents();
+    }
+
+    private void generateRestOfComponents() {
         generateSongList();
         generateListModel();
         generateJList();
         generateListScroller();
         add(listScrollPane);
     }
-
-
 
     private void generateToolBar() {
         toolBar = new JToolBar("Songs ToolBar");
@@ -78,4 +76,8 @@ public class SongsPanel extends JPanel {
         songDao.create(song);
     }
 
+    public void revalidateMe() {
+        remove(listScrollPane);
+        generateRestOfComponents();
+    }
 }

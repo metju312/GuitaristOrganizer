@@ -10,6 +10,8 @@ import java.util.List;
 public class ArtistsPanel extends JPanel {
     private MainWindow mainWindow;
 
+    ArtistDao artistDao = new ArtistDao();
+
     private DefaultListModel listModel;
     private List<Artist> artistList;
     private JList jList;
@@ -20,15 +22,28 @@ public class ArtistsPanel extends JPanel {
     public ArtistsPanel(MainWindow mainWindow) {
         this.mainWindow = mainWindow;
         setLayout(new BorderLayout());
+        saveOtherArtistIfNotExists("Other Artists");
 
         generateToolBar();
         add(toolBar, BorderLayout.NORTH);
 
+        generateRestOfComponents();
+    }
+
+    private void generateRestOfComponents() {
         generateArtistList();
         generateListModel();
         generateJList();
-        generateAndAddListScroller();
+        generateListScroller();
+        add(listScrollPane);
+    }
 
+    private void saveOtherArtistIfNotExists(String otherName) {
+        if(artistDao.findArtistsWithName(otherName).size()==0){
+            Artist artist = new Artist();
+            artist.setName(otherName);
+            artistDao.create(artist);
+        }
     }
 
     private void generateToolBar() {
@@ -38,10 +53,9 @@ public class ArtistsPanel extends JPanel {
         toolBar.setFloatable(false);
     }
 
-    private void generateAndAddListScroller() {
+    private void generateListScroller() {
         listScrollPane = new JScrollPane(jList);
         listScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        add(listScrollPane);
     }
 
     private void generateJList() {
@@ -60,14 +74,19 @@ public class ArtistsPanel extends JPanel {
     }
 
     private void generateArtistList() {
-        ArtistDao artistDao = new ArtistDao();
         artistList = artistDao.findAll();
     }
 
     private void saveArtist() {
-        ArtistDao artistDao = new ArtistDao();
         Artist artist = new Artist();
         artist.setName("Adele");
         artistDao.create(artist);
+    }
+
+    public void revalidateMe() {
+        remove(listScrollPane);
+        generateRestOfComponents();
+        revalidate();
+        repaint();
     }
 }

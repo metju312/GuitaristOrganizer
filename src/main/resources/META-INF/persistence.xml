@@ -7,7 +7,6 @@
     <persistence-unit name="JPA" transaction-type="RESOURCE_LOCAL">
         <provider>org.hibernate.ejb.HibernatePersistence</provider>
 
-        <class>pl.edu.wat.wcy.pz.model.entities.accounts.Admin</class>
         <class>pl.edu.wat.wcy.pz.model.entities.accounts.User</class>
 
         <class>pl.edu.wat.wcy.pz.model.entities.music.Artist</class>

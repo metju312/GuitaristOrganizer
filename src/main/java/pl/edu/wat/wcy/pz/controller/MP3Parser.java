@@ -10,15 +10,19 @@ import org.apache.tika.parser.mp3.Mp3Parser;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
+import pl.edu.wat.wcy.pz.model.dao.ArtistDao;
 import pl.edu.wat.wcy.pz.model.dao.SongDao;
+import pl.edu.wat.wcy.pz.model.entities.music.Artist;
 import pl.edu.wat.wcy.pz.model.entities.music.Song;
 
 import java.io.*;
+import java.util.Objects;
 
 public class MP3Parser {
     private SongDao songDao = new SongDao();
+    private ArtistDao artistDao = new ArtistDao();
 
-    public void addSongToDatabase(String mp3Path) {
+    public void addSongAndArtistToDatabase(String mp3Path) {
 
         try {
             ContentHandler handler = new DefaultHandler();
@@ -30,20 +34,11 @@ public class MP3Parser {
             input.close();
 
 
-            String[] metadataNames = metadata.names();
+            Artist artist = generateNewArtist(metadata);
 
-            for (String name : metadataNames) {
-                metadata.get(name);
-            }
+            generateSong(metadata, artist, mp3Path);
 
-            Song song = new Song();
-            if (metadata.get("title") == null) {
-                song.setTitle(FilenameUtils.getBaseName(mp3Path));
-            } else {
-                song.setTitle(metadata.get("title"));
-            }
-            song.setPath(mp3Path);
-            songDao.create(song);
+
 
 //            System.out.println("Title: " + metadata.get("title"));
 //            System.out.println("Artists: " + metadata.get("xmpDM:artist"));
@@ -61,4 +56,34 @@ public class MP3Parser {
             e.printStackTrace();
         }
     }
+
+    private void generateSong(Metadata metadata, Artist artist, String mp3Path) {
+        Song song = new Song();
+        if (metadata.get("title") == null || Objects.equals(metadata.get("title"), "")) {
+            song.setTitle(FilenameUtils.getBaseName(mp3Path));
+        } else {
+            song.setTitle(metadata.get("title"));
+        }
+
+        if(metadata.get("xmpDM:artist")==null || Objects.equals(metadata.get("xmpDM:artist"), "")){
+            song.setArtist(artistDao.findArtistsWithName("Other Artists").get(0));
+        }else{
+            song.setArtist(artist);
+        }
+
+        song.setPath(mp3Path);
+        songDao.create(song);
+    }
+
+
+    private Artist generateNewArtist(Metadata metadata) {
+        if(metadata.get("xmpDM:artist")!=null && !Objects.equals(metadata.get("xmpDM:artist"), "")){
+            Artist artist = new Artist();
+            artist.setName(metadata.get("xmpDM:artist"));
+            artistDao.create(artist);
+            return artist;
+        }
+        return null;
+    }
+
 }

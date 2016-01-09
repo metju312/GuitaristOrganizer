@@ -62,7 +62,7 @@ public class MenuBar extends JMenuBar implements ActionListener{
             }
         });
         update.setText("Update");
-        update.setIcon(new ImageIcon("src/images/searchIcon.png"));
+        update.setIcon(new ImageIcon("src/images/searchUpdate.png"));
         update.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_U, ActionEvent.CTRL_MASK));
         update.setActionCommand("Update");
     }

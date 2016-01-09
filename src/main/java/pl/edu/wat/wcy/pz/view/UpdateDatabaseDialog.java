@@ -3,7 +3,9 @@ package pl.edu.wat.wcy.pz.view;
 import net.miginfocom.swing.MigLayout;
 import pl.edu.wat.wcy.pz.controller.MP3Parser;
 import pl.edu.wat.wcy.pz.model.dao.FolderDao;
+import pl.edu.wat.wcy.pz.model.dao.SongDao;
 import pl.edu.wat.wcy.pz.model.entities.music.Folder;
+import pl.edu.wat.wcy.pz.model.entities.music.Song;
 
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
@@ -19,6 +21,8 @@ import java.util.List;
 
 public class UpdateDatabaseDialog extends JDialog {
     private MainWindow mainWindow;
+
+    private SongDao songDao = new SongDao();
 
     private JLabel label;
     private JScrollPane scrollPane;
@@ -61,6 +65,10 @@ public class UpdateDatabaseDialog extends JDialog {
             public void actionPerformed(ActionEvent e) {
                 updateFolders();
                 generateMp3Paths();
+                addSongsAndArtistsToDatabase();
+                mainWindow.songsPanel.revalidateMe();
+                mainWindow.artistsPanel.revalidateMe();
+
                 dispose();
             }
         });
@@ -86,15 +94,13 @@ public class UpdateDatabaseDialog extends JDialog {
                 getMp3s(f);
             }
         }
-        addSongsToDatabase();
-        //drawMp3Paths();
     }
 
 
-    private void addSongsToDatabase() {
+    private void addSongsAndArtistsToDatabase() {
         MP3Parser parser = new MP3Parser();
         for (String mp3Path : mp3Paths) {
-            parser.addSongToDatabase(mp3Path);
+            parser.addSongAndArtistToDatabase(mp3Path);
         }
     }
 
@@ -114,11 +120,20 @@ public class UpdateDatabaseDialog extends JDialog {
         else {
             String path = f.getPath();
             if (path.substring(path.length()-4, path.length()).equals(".mp3")) {
-                mp3Paths.add(f.getPath());
+                if(!songAlreadyExists(f.getPath())){
+                    mp3Paths.add(f.getPath());
+                }
             }
         }
     }
 
+    private boolean songAlreadyExists(String path) {
+        List<Song> resultList = songDao.findSongsWithPath(path);
+        if(resultList.size()==0){
+            return false;
+        }
+        return true;
+    }
 
 
     private void updateFolders() {

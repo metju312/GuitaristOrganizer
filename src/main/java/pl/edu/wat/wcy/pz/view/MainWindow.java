@@ -1,9 +1,12 @@
 package pl.edu.wat.wcy.pz.view;
 
+import de.javasoft.plaf.synthetica.SyntheticaBlackEyeLookAndFeel;
+import de.javasoft.plaf.synthetica.SyntheticaLookAndFeel;
+
 import javax.swing.*;
 import java.awt.*;
 
-public class MainWindow extends JFrame{
+public class MainWindow extends JFrame {
     private static MainWindow instance = null;
 
     public int mainWindowWidth = 700;
@@ -30,6 +33,7 @@ public class MainWindow extends JFrame{
 
     private MainWindow() {
         super("Guitarist Organizer");
+        setIcon();
         setLookAndFeel();
         setMainWindowValues();
         setMainWindowLayout();
@@ -48,6 +52,11 @@ public class MainWindow extends JFrame{
         generateVerticalSplitPane();
 
         getContentPane().add(verticalSplitPane, BorderLayout.CENTER);
+    }
+
+    private void setIcon() {
+        ImageIcon img = new ImageIcon("src/images/guitarIcon.png");
+        setIconImage(img.getImage());
     }
 
     private void generateToolBarsPanel() {
@@ -103,16 +112,18 @@ public class MainWindow extends JFrame{
 
     private void setLookAndFeel() {
         try {
-            //UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
-            UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (UnsupportedLookAndFeelException e) {
-            e.printStackTrace();
+
+            UIManager.removeAuxiliaryLookAndFeel(UIManager.getLookAndFeel());
+            SyntheticaLookAndFeel.setWindowsDecorated(false);
+            UIManager.setLookAndFeel(new SyntheticaBlackEyeLookAndFeel());
+            SwingUtilities.updateComponentTreeUI(this);
+
+        } catch (Exception ex) {
+            try {
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 

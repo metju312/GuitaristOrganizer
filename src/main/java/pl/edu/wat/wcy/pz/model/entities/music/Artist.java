@@ -10,7 +10,7 @@ import java.util.List;
 public class Artist implements Serializable {
     private int id;
     private String name;
-    private Song song;
+    private List<Song> songList = new ArrayList<>();
 
     public Artist() {
         super();
@@ -34,13 +34,12 @@ public class Artist implements Serializable {
         this.name = name;
     }
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn
-    public Song getSong() {
-        return song;
+    @OneToMany(mappedBy = "artist", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    public List<Song> getSongList() {
+        return songList;
     }
 
-    public void setSong(Song song) {
-        this.song = song;
+    public void setSongList(List<Song> songList) {
+        this.songList = songList;
     }
 }

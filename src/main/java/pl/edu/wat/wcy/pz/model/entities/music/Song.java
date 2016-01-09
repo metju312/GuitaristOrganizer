@@ -12,7 +12,7 @@ public class Song implements Serializable {
     private String title;
     private String path;
     private String url;
-    private List<Artist> artistList = new ArrayList<>();
+    private Artist artist;
     private List<Cover> coverList = new ArrayList<>();
     private List<Tab> tabList = new ArrayList<>();
 
@@ -54,13 +54,14 @@ public class Song implements Serializable {
         this.url = url;
     }
 
-    @OneToMany(mappedBy = "song", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
-    public List<Artist> getArtistList() {
-        return artistList;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn
+    public Artist getArtist() {
+        return artist;
     }
 
-    public void setArtistList(List<Artist> artistList) {
-        this.artistList = artistList;
+    public void setArtist(Artist artist) {
+        this.artist = artist;
     }
 
     @OneToMany(mappedBy = "song", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
