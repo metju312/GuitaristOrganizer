@@ -1,6 +1,7 @@
 package pl.edu.wat.wcy.pz.view;
 
 import net.miginfocom.swing.MigLayout;
+import pl.edu.wat.wcy.pz.controller.MP3Parser;
 import pl.edu.wat.wcy.pz.model.dao.FolderDao;
 import pl.edu.wat.wcy.pz.model.entities.music.Folder;
 
@@ -11,6 +12,7 @@ import javax.swing.text.StyledDocument;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.util.*;
 import java.util.List;
 
@@ -26,6 +28,7 @@ public class UpdateDatabaseDialog extends JDialog {
     private JButton okButton;
     private JButton cancelButton;
     private JPanel buttonsPanel;
+    private ArrayList<String> mp3Paths = new ArrayList();
 
     public UpdateDatabaseDialog(MainWindow mainWindow) {
         super(mainWindow, "Update Database", true);
@@ -57,7 +60,7 @@ public class UpdateDatabaseDialog extends JDialog {
             @Override
             public void actionPerformed(ActionEvent e) {
                 updateFolders();
-                mainWindow.artistsPanel.drawAllArtists();
+                generateMp3Paths();
                 dispose();
             }
         });
@@ -72,6 +75,51 @@ public class UpdateDatabaseDialog extends JDialog {
         });
         buttonsPanel.add(cancelButton);
     }
+
+    private void generateMp3Paths() {
+        FolderDao folderDao = new FolderDao();
+        List<Folder> folderList = folderDao.findAll();
+        File f;
+        for (Folder folder : folderList) {
+            if (!folder.getPath().equals("")){
+                f = new File(folder.getPath());
+                getMp3s(f);
+            }
+        }
+        addSongsToDatabase();
+        //drawMp3Paths();
+    }
+
+
+    private void addSongsToDatabase() {
+        MP3Parser parser = new MP3Parser();
+        for (String mp3Path : mp3Paths) {
+            parser.addSongToDatabase(mp3Path);
+        }
+    }
+
+    private void drawMp3Paths() {
+        for (String mp3Path : mp3Paths) {
+            System.out.println(mp3Path);
+        }
+    }
+
+    void getMp3s(File f) {
+        File[] files;
+        if (f.isDirectory() && (files = f.listFiles()) != null) {
+            for (File file : files) {
+                getMp3s(file);
+            }
+        }
+        else {
+            String path = f.getPath();
+            if (path.substring(path.length()-4, path.length()).equals(".mp3")) {
+                mp3Paths.add(f.getPath());
+            }
+        }
+    }
+
+
 
     private void updateFolders() {
         //saveFolder();
@@ -172,5 +220,4 @@ public class UpdateDatabaseDialog extends JDialog {
         setLocationRelativeTo(null);
         setResizable(false);
     }
-
 }

@@ -70,8 +70,4 @@ public class ArtistsPanel extends JPanel {
         artist.setName("Adele");
         artistDao.create(artist);
     }
-
-    public void drawAllArtists() {
-        mainWindow.songsPanel.drawAllSongs();
-    }
 }

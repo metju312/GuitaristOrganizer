@@ -1,10 +1,15 @@
 package pl.edu.wat.wcy.pz.view;
 
+import pl.edu.wat.wcy.pz.controller.MP3Parser;
+import pl.edu.wat.wcy.pz.model.dao.FolderDao;
 import pl.edu.wat.wcy.pz.model.dao.SongDao;
+import pl.edu.wat.wcy.pz.model.entities.music.Folder;
 import pl.edu.wat.wcy.pz.model.entities.music.Song;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 public class SongsPanel extends JPanel {
@@ -17,32 +22,31 @@ public class SongsPanel extends JPanel {
     private Song actualSong;
     private JToolBar toolBar;
 
+
     public SongsPanel(MainWindow mainWindow) {
         this.mainWindow = mainWindow;
         setLayout(new BorderLayout());
-        generateAndAddToolBar();
+        generateToolBar();
+        add(toolBar, BorderLayout.NORTH);
         generateSongList();
         generateListModel();
         generateJList();
-        generateAndAddListScroller();
-
-
+        generateListScroller();
+        add(listScrollPane);
     }
 
 
 
-    private void generateAndAddToolBar() {
+    private void generateToolBar() {
         toolBar = new JToolBar("Songs ToolBar");
         JLabel label = new JLabel("Songs");
         toolBar.add(label);
         toolBar.setFloatable(false);
-        add(toolBar, BorderLayout.NORTH);
     }
 
-    private void generateAndAddListScroller() {
+    private void generateListScroller() {
         listScrollPane = new JScrollPane(jList);
         listScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        add(listScrollPane);
     }
 
     private void generateJList() {
@@ -74,7 +78,4 @@ public class SongsPanel extends JPanel {
         songDao.create(song);
     }
 
-    public void drawAllSongs() {
-
-    }
 }

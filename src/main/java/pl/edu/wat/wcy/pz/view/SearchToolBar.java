@@ -30,7 +30,7 @@ public class SearchToolBar extends JToolBar {
         setLayout(new MigLayout());
         addLabel("Find:");
         addNewSeparator();
-        addTextField(10);
+        addTextField(20);
         addNewSeparator();
         addComboBox();
         addNewSeparator();
@@ -47,7 +47,7 @@ public class SearchToolBar extends JToolBar {
         button.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                checkDirectory();
+                //TODO - search title or artist in browser
             }
         });
         add(button);
@@ -89,65 +89,5 @@ public class SearchToolBar extends JToolBar {
     private void addLabel(String find) {
         JLabel label = new JLabel(find);
         add(label);
-    }
-
-    private void checkDirectory() {
-        String fileLocation = "D:/Muzyka/Nowa/!Do słuchania/Awolnation - Sail.mp3";
-
-        try {
-
-            InputStream input = new FileInputStream(new File(fileLocation));
-            ContentHandler handler = new DefaultHandler();
-            Metadata metadata = new Metadata();
-            Parser parser = new Mp3Parser();
-            ParseContext parseCtx = new ParseContext();
-            parser.parse(input, handler, metadata, parseCtx);
-            input.close();
-
-            // List all metadata
-            String[] metadataNames = metadata.names();
-
-            for(String name : metadataNames){
-                System.out.println(name + ": " + metadata.get(name));
-            }
-
-            // Retrieve the necessary info from metadata
-            // Names - title, xmpDM:artist etc. - mentioned below may differ based
-            System.out.println("----------------------------------------------");
-            System.out.println("----------------------------------------------");
-            System.out.println("----------------------------------------------");
-            System.out.println("----------------------------------------------");
-            System.out.println("----------------------------------------------");
-            System.out.println("----------------------------------------------");
-            System.out.println("----------------------------------------------");
-            System.out.println("----------------------------------------------");
-            System.out.println("----------------------------------------------");
-            System.out.println("----------------------------------------------");
-            System.out.println("----------------------------------------------");
-            System.out.println("----------------------------------------------");
-            System.out.println("----------------------------------------------");
-            System.out.println("----------------------------------------------");
-            System.out.println("----------------------------------------------");
-            System.out.println("----------------------------------------------");
-            System.out.println("----------------------------------------------");
-            System.out.println("----------------------------------------------");
-            System.out.println("----------------------------------------------");
-            System.out.println("----------------------------------------------");
-            System.out.println("----------------------------------------------");
-            System.out.println("Title: " + metadata.get("title"));
-            System.out.println("Artists: " + metadata.get("xmpDM:artist"));
-            System.out.println("Composer : "+metadata.get("xmpDM:composer"));
-            System.out.println("Genre : "+metadata.get("xmpDM:genre"));
-            System.out.println("Album : "+metadata.get("xmpDM:album"));
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (SAXException e) {
-            e.printStackTrace();
-        } catch (TikaException e) {
-            e.printStackTrace();
-        }
     }
 }

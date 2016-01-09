@@ -1,17 +1,13 @@
 package pl.edu.wat.wcy.pz.view;
 
-import com.sun.glass.events.KeyEvent;
-import net.miginfocom.swing.MigLayout;
-
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 
 public class MainWindow extends JFrame{
     private static MainWindow instance = null;
 
-    public int mainWindowWidth = 500;
-    public int mainWindowHeight = 500;
+    public int mainWindowWidth = 700;
+    public int mainWindowHeight = 600;
 
     private MenuBar menuBar;
 
