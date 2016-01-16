@@ -47,11 +47,12 @@ public class MenuBar extends JMenuBar implements ActionListener{
         settings = new JMenuItem(new AbstractAction("Settings action") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                //TODO generate settings dialog
+                new SettingsDialog(mainWindow);
             }
         });
         settings.setText("Settings...");
         settings.setIcon(new ImageIcon("src/images/settingsIcon.png"));
+        settings.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK));
         settings.setActionCommand("Settings");
     }
 
@@ -70,7 +71,7 @@ public class MenuBar extends JMenuBar implements ActionListener{
         websiteSearch = new JMenuItem(new AbstractAction("WebsiteSearch action") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                //TODO find
+                mainWindow.searchToolBar.websiteSearchButtonClicked();
             }
         });
         websiteSearch.setText("Website Search...");
@@ -83,7 +84,7 @@ public class MenuBar extends JMenuBar implements ActionListener{
         find = new JMenuItem(new AbstractAction("Find action") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                //TODO find
+                mainWindow.searchToolBar.searchButtonClicked();
             }
         });
         find.setText("Find");

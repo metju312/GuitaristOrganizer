@@ -14,7 +14,7 @@ public class MainWindow extends JFrame {
 
     private MenuBar menuBar;
 
-    private SearchToolBar searchToolBar;
+    public SearchToolBar searchToolBar;
     public ArtistsPanel artistsPanel;
     public SongsPanel songsPanel;
     public TablePanel tablePanel;

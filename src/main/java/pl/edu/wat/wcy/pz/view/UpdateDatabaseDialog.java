@@ -74,7 +74,7 @@ public class UpdateDatabaseDialog extends JDialog {
                 dispose();
             }
         });
-        buttonsPanel.add(okButton);
+        buttonsPanel.add(okButton, "gapleft 196");
 
         cancelButton = new JButton(new ImageIcon("src/images/cancelIcon.png"));
         cancelButton.setText("Cancel");
@@ -84,7 +84,7 @@ public class UpdateDatabaseDialog extends JDialog {
                 dispose();
             }
         });
-        buttonsPanel.add(cancelButton);
+        buttonsPanel.add(cancelButton, "gapleft 4");
     }
 
     private void generateMp3Paths() {

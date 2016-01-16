@@ -76,15 +76,20 @@ public class SearchToolBar extends JToolBar {
         websiteSearchButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if(Objects.equals(textField.getText(), "")){
-                    JOptionPane.showMessageDialog(websiteSearchButton, "Text field is empty.");
-                }else{
-                    BrowserSearcher browserSearcher = new BrowserSearcher();
-                    browserSearcher.searchString(textField.getText(), comboBoxWebsites.getSelectedItem(), comboBoxTitleAndArtist.getSelectedItem());
-                }
+                websiteSearchButtonClicked();
             }
         });
         add(websiteSearchButton);
+    }
+
+    public void websiteSearchButtonClicked() {
+
+        if(Objects.equals(textField.getText(), "")){
+            JOptionPane.showMessageDialog(websiteSearchButton, "Text field is empty.");
+        }else{
+            BrowserSearcher browserSearcher = new BrowserSearcher();
+            browserSearcher.searchString(textField.getText(), comboBoxWebsites.getSelectedItem(), comboBoxTitleAndArtist.getSelectedItem());
+        }
     }
 
     private void setDefaultWebsitesIfNotExists() {
@@ -122,14 +127,18 @@ public class SearchToolBar extends JToolBar {
         searchButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if(Objects.equals(textField.getText(), "")){
-                    JOptionPane.showMessageDialog(searchButton, "Text field is empty.");
-                }else {
-                    afterWriteInTextFieldMethod();
-                }
+                searchButtonClicked();
             }
         });
         add(searchButton);
+    }
+
+    public void searchButtonClicked() {
+        if(Objects.equals(textField.getText(), "")){
+            JOptionPane.showMessageDialog(searchButton, "Text field is empty.");
+        }else {
+            afterWriteInTextFieldMethod();
+        }
     }
 
     private void afterWriteInTextFieldMethod() {

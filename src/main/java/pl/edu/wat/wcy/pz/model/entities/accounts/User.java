@@ -11,6 +11,7 @@ public class User implements Serializable {
     private int id;
     private String login;
     private String password;
+    private int lafIndex;
 
     public User() {
         super();
@@ -40,5 +41,18 @@ public class User implements Serializable {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public int getLafIndex() {
+        return lafIndex;
+    }
+
+    public void setLafIndex(int lafIndex) {
+        this.lafIndex = lafIndex;
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        lafIndex = 0;
     }
 }
