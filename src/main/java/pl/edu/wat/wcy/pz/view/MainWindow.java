@@ -1,6 +1,6 @@
 package pl.edu.wat.wcy.pz.view;
 
-import de.javasoft.plaf.synthetica.SyntheticaBlackEyeLookAndFeel;
+import de.javasoft.plaf.synthetica.SyntheticaBlackMoonLookAndFeel;
 import de.javasoft.plaf.synthetica.SyntheticaLookAndFeel;
 
 import javax.swing.*;
@@ -17,7 +17,7 @@ public class MainWindow extends JFrame {
     private SearchToolBar searchToolBar;
     public ArtistsPanel artistsPanel;
     public SongsPanel songsPanel;
-    private ListPanel listPanel;
+    public TablePanel tablePanel;
 
     private JSplitPane horizontalSplitPane;
     private JSplitPane verticalSplitPane;
@@ -46,7 +46,7 @@ public class MainWindow extends JFrame {
 
         generateArtistsPanel();
         generateSonsPanel();
-        generateListPanel();
+        generateTablePanel();
 
         generateHorizontalSplitPane();
         generateVerticalSplitPane();
@@ -68,17 +68,19 @@ public class MainWindow extends JFrame {
     }
 
     private void generateVerticalSplitPane() {
-        verticalSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, horizontalSplitPane, listPanel);
+        verticalSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, horizontalSplitPane, tablePanel);
+        verticalSplitPane.setContinuousLayout(true);
         verticalSplitPane.setOneTouchExpandable(true);
         verticalSplitPane.setDividerLocation(200);
     }
 
-    private void generateListPanel() {
-        listPanel = new ListPanel();
+    private void generateTablePanel() {
+        tablePanel = new TablePanel();
     }
 
     private void generateHorizontalSplitPane() {
         horizontalSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, artistsPanel, songsPanel);
+        horizontalSplitPane.setContinuousLayout(true);
         horizontalSplitPane.setOneTouchExpandable(true);
         horizontalSplitPane.setDividerLocation(200);
 
@@ -93,7 +95,7 @@ public class MainWindow extends JFrame {
     }
 
     private void generateSearchToolBar() {
-        searchToolBar = new SearchToolBar("Search ToolBar");
+        searchToolBar = new SearchToolBar("Search ToolBar", this);
     }
 
     private void setMainWindowValues() {
@@ -115,7 +117,7 @@ public class MainWindow extends JFrame {
 
             UIManager.removeAuxiliaryLookAndFeel(UIManager.getLookAndFeel());
             SyntheticaLookAndFeel.setWindowsDecorated(false);
-            UIManager.setLookAndFeel(new SyntheticaBlackEyeLookAndFeel());
+            UIManager.setLookAndFeel(new SyntheticaBlackMoonLookAndFeel());
             SwingUtilities.updateComponentTreeUI(this);
 
         } catch (Exception ex) {

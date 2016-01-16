@@ -16,4 +16,14 @@ public class ArtistDao extends GenericDaoImpl<Artist> {
         logger.info("Find artists with name: " + name);
         return em.createQuery("from Artist a where a.name = :t",Artist.class).setParameter("t",name).getResultList();
     }
+
+    public List<Artist> findAllArtistsOrderByName(){
+        logger.info("Find all artists order by name");
+        return em.createQuery("from Artist a ORDER BY a.name",Artist.class).getResultList();
+    }
+
+    public List<Artist> findAllArtistsOrderByNameDesc(){
+        logger.info("Find all artists order by name desc");
+        return em.createQuery("from Artist a ORDER BY a.name DESC",Artist.class).getResultList();
+    }
 }

@@ -59,7 +59,8 @@ public class UpdateDatabaseDialog extends JDialog {
         buttonsPanel = new JPanel();
         buttonsPanel.setLayout(new MigLayout());
 
-        okButton = new JButton("OK");
+        okButton = new JButton(new ImageIcon("src/images/okIcon.png"));
+        okButton.setText("OK");
         okButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -69,12 +70,14 @@ public class UpdateDatabaseDialog extends JDialog {
                 mainWindow.songsPanel.revalidateMe();
                 mainWindow.artistsPanel.revalidateMe();
 
+                //TODO usunięcie songs i artist których już nie ma bo zmeniły się directory
                 dispose();
             }
         });
         buttonsPanel.add(okButton);
 
-        cancelButton = new JButton("Cancel");
+        cancelButton = new JButton(new ImageIcon("src/images/cancelIcon.png"));
+        cancelButton.setText("Cancel");
         cancelButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -177,10 +180,10 @@ public class UpdateDatabaseDialog extends JDialog {
         textPane = new JTextPane();
         textPane.setPreferredSize(new Dimension(340, 400));
         textPane.setEditable(false);
-        setTextAreaContent();
+        setTextPaneContent();
     }
 
-    private void setTextAreaContent() {
+    private void setTextPaneContent() {
         StyledDocument doc = textPane.getStyledDocument();
         SimpleAttributeSet attr = new SimpleAttributeSet();
         for (int i = 0; i < 20;i++ )

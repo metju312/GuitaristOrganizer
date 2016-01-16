@@ -11,11 +11,15 @@ import java.util.*;
 public class BrowserSearcher {
     private WebsiteDao websiteDao = new WebsiteDao();
 
-    public void searchString(String text, Object selectedItem) {
-        java.util.List<Website> websiteList = websiteDao.findWebsitesWithTitle(selectedItem.toString());
+    public void searchString(String text, Object selectedWebsite, Object selectedTitleOrArtist) {
+        java.util.List<Website> websiteList = websiteDao.findWebsitesWithTitle(selectedWebsite.toString());
 
         try {
-            openWebpage(new URL(websiteList.get(0).getUrlTitle()+URLEncoder.encode(text, "UTF-8")));
+            if(Objects.equals(selectedTitleOrArtist.toString(), "Title")){
+                openWebpage(new URL(websiteList.get(0).getUrlTitle()+URLEncoder.encode(text, "UTF-8")));
+            }else{
+                openWebpage(new URL(websiteList.get(0).getUrlArtist()+URLEncoder.encode(text, "UTF-8")));
+            }
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (UnsupportedEncodingException e) {

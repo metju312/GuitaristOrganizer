@@ -16,6 +16,7 @@ import pl.edu.wat.wcy.pz.model.entities.music.Artist;
 import pl.edu.wat.wcy.pz.model.entities.music.Song;
 
 import java.io.*;
+import java.util.List;
 import java.util.Objects;
 
 public class MP3Parser {
@@ -35,8 +36,12 @@ public class MP3Parser {
 
 
             Artist artist = generateNewArtist(metadata);
+            artist = changeArtistIfAlreadyExists(artist);
+            if(artist!=null){
+                artistDao.create(artist);
+            }
 
-            generateSong(metadata, artist, mp3Path);
+            generateSongAndCreateIfNotExists(metadata, artist, mp3Path);
 
 
 
@@ -57,7 +62,19 @@ public class MP3Parser {
         }
     }
 
-    private void generateSong(Metadata metadata, Artist artist, String mp3Path) {
+    private Artist changeArtistIfAlreadyExists(Artist artist) {
+        if(artist!=null){
+            List<Artist> artists = artistDao.findArtistsWithName(artist.getName());
+            if(artists.size() == 0){
+                return artist;
+            }else{
+                return artists.get(0);
+            }
+        }
+        return null;
+    }
+
+    private void generateSongAndCreateIfNotExists(Metadata metadata, Artist artist, String mp3Path) {
         Song song = new Song();
         if (metadata.get("title") == null || Objects.equals(metadata.get("title"), "")) {
             song.setTitle(FilenameUtils.getBaseName(mp3Path));
@@ -66,13 +83,23 @@ public class MP3Parser {
         }
 
         if(metadata.get("xmpDM:artist")==null || Objects.equals(metadata.get("xmpDM:artist"), "")){
-            song.setArtist(artistDao.findArtistsWithName("Other Artists").get(0));
+            song.setArtist(artistDao.findArtistsWithName("Unknown Artist").get(0));
         }else{
             song.setArtist(artist);
         }
 
         song.setPath(mp3Path);
-        songDao.create(song);
+        if(!songAlreadyExists(song)){
+            songDao.create(song);
+        }
+    }
+
+    private boolean songAlreadyExists(Song song) {
+        List<Song> songList = songDao.findSongsWithTitle(song.getTitle());
+        if(songList.size() == 0){
+            return false;
+        }
+        return true;
     }
 
 
@@ -80,7 +107,6 @@ public class MP3Parser {
         if(metadata.get("xmpDM:artist")!=null && !Objects.equals(metadata.get("xmpDM:artist"), "")){
             Artist artist = new Artist();
             artist.setName(metadata.get("xmpDM:artist"));
-            artistDao.create(artist);
             return artist;
         }
         return null;
