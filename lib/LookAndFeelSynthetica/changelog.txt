@@ -1,0 +1,100 @@
+10/12/2011 V2.9.5
+- Added UI-property "ToolTip.background" support.
+
+------------------------------------------------------------------------------- 
+
+07/05/2011 V2.9.4
+- Changed ScrollBar.minimumThumbSize type to lowercase - dimension.   
+
+------------------------------------------------------------------------------- 
+
+01/17/2011 V2.9.3
+- Increased window resize border to improve usability  
+- Increased table header and table cell insets  
+
+------------------------------------------------------------------------------- 
+
+09/22/2010 V2.9.2
+- Slider Focus update
+
+------------------------------------------------------------------------------- 
+
+01/01/2010 V2.9.1
+- Updated copyright and license because of company rebrand.
+
+------------------------------------------------------------------------------- 
+
+10/07/2009 V2.9.0
+- Added support to handle multiple XML files
+- Removed SyntheticaAddons configuration from synth.xml 
+
+-------------------------------------------------------------------------------
+
+02/09/2009 V2.6.1
+- Removed Synth imagePainter for disabled spinner because this is already 
+  handled by Synthetica.  
+
+-------------------------------------------------------------------------------
+
+06/16/2008 V2.6.0
+- Renamed flexdock UI-property keys
+- Added additional icons to improve support for third party docking solutions 
+
+-------------------------------------------------------------------------------
+
+05/25/2008 V2.5.0
+- Modified tool bar handle reference
+- Removed unnecessary object wrappers
+- Added button definitions for ButtonBar
+- TabbedPane tab micro correction
+- Modified tooltip text color for disabled components
+
+-------------------------------------------------------------------------------
+
+11/27/2007 V2.4.0
+- Added vertical/horizontal toolBar handle.
+- Increased arrow button size for scrollable tabbedPanes.
+- Removed typo for disabled arrow buttons which can cause NPE.
+
+-------------------------------------------------------------------------------
+
+05/08/2007 V2.3.0
+- Added SyntheticaAddons/JXTitledPanel support
+- Added "ScrollBar.minimumThumbSize" property
+
+-------------------------------------------------------------------------------
+
+01/01/2007 V2.2.0
+- Added focus support for textComponents and scrollPanes
+- Shrinked library file size
+- Bugfix: Wrong textcolor for selected and disabled menuItems (with Java SE 6)
+- Bugfix: Disabled default buttons get painted as enabled
+
+-------------------------------------------------------------------------------
+
+10/15/2006 V2.0.1
+- Bugfix: Changed active/inactive internalFrame titlePane background colors 
+          for compatibility issues
+
+-------------------------------------------------------------------------------
+
+05/31/2006 V2.0.0
+- Support for SyntheticaAddons
+- Bugfix: Wrong size of InternalFrameTitleBars with Java SE 6
+- Bugfix: Background issue for textComponents
+
+-------------------------------------------------------------------------------
+
+12/15/2005 V1.0.1 
+- Changed border color for table scrollpane.
+- Removed backgroundimage for locked TextArea.
+- Bugfix: Selected and focused checkboxes/radiobuttons will be painted as 
+  unselected with Java SE 6.
+- Fixed issue to display background for a custom tableCellRenderer makes use of
+  checkBoxes or radioButtons.
+- Changed insets of toolBar background image for use with east/west layout.
+
+-------------------------------------------------------------------------------
+
+11/10/2005 V1.0.0 
+- First official release of SilverMoon LAF.
