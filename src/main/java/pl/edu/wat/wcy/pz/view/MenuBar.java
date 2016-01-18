@@ -3,6 +3,7 @@ package pl.edu.wat.wcy.pz.view;
 import com.sun.glass.events.KeyEvent;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
@@ -34,6 +35,11 @@ public class MenuBar extends JMenuBar implements ActionListener{
         add(viewMenu);
     }
 
+    private void logoutButtonClicked() {
+        new LoginWindow();
+        mainWindow.dispose();
+    }
+
     private void generateViewMenuWithMenuItems() {
         viewMenu = new JMenu("View");
         viewMenu.setMnemonic(KeyEvent.VK_V);
@@ -47,7 +53,8 @@ public class MenuBar extends JMenuBar implements ActionListener{
         settings = new JMenuItem(new AbstractAction("Settings action") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new SettingsDialog(mainWindow);
+                SettingsDialog settingsDialog = new SettingsDialog(mainWindow);
+                mainWindow.settingsDialog = settingsDialog;
             }
         });
         settings.setText("Settings...");

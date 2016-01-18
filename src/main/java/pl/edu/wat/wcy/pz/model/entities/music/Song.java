@@ -14,7 +14,6 @@ public class Song implements Serializable {
     private String url;
     private Artist artist;
     private List<Cover> coverList = new ArrayList<>();
-    private List<Tab> tabList = new ArrayList<>();
 
     public Song() {
         super();
@@ -64,21 +63,12 @@ public class Song implements Serializable {
         this.artist = artist;
     }
 
-    @OneToMany(mappedBy = "song", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "song", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval=true)
     public List<Cover> getCoverList() {
         return coverList;
     }
 
     public void setCoverList(List<Cover> coverList) {
         this.coverList = coverList;
-    }
-
-    @OneToMany(mappedBy = "song", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
-    public List<Tab> getTabList() {
-        return tabList;
-    }
-
-    public void setTabList(List<Tab> tabList) {
-        this.tabList = tabList;
     }
 }

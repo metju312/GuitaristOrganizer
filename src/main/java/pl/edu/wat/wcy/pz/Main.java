@@ -1,5 +1,6 @@
 package pl.edu.wat.wcy.pz;
 
+import pl.edu.wat.wcy.pz.view.LoginWindow;
 import pl.edu.wat.wcy.pz.view.MainWindow;
 
 import javax.swing.*;
@@ -10,7 +11,8 @@ public class Main {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                MainWindow.getInstance().setVisible(true);
+                LoginWindow.getInstance().setVisible(true);
+                //MainWindow.getInstance().setVisible(true);
             }
         });
     }

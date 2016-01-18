@@ -1,5 +1,7 @@
 package pl.edu.wat.wcy.pz.model.entities.web;
 
+import pl.edu.wat.wcy.pz.model.entities.accounts.User;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -12,6 +14,7 @@ public class Website implements Serializable {
     private String title;
     private String urlTitle;
     private String urlArtist;
+    private User user;
 
     public Website() {
         super();
@@ -49,5 +52,15 @@ public class Website implements Serializable {
 
     public void setUrlArtist(String urlArtist) {
         this.urlArtist = urlArtist;
+    }
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

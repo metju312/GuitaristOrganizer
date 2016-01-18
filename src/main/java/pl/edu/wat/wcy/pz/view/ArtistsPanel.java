@@ -1,5 +1,6 @@
 package pl.edu.wat.wcy.pz.view;
 
+import net.miginfocom.swing.MigLayout;
 import pl.edu.wat.wcy.pz.model.dao.ArtistDao;
 import pl.edu.wat.wcy.pz.model.entities.music.Artist;
 
@@ -10,6 +11,8 @@ import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -19,8 +22,6 @@ import java.util.Objects;
 public class ArtistsPanel extends JPanel {
     private MainWindow mainWindow;
 
-    ArtistDao artistDao = new ArtistDao();
-
     private DefaultListModel listModel;
     private List<Artist> artistList;
     private JList jList;
@@ -29,9 +30,15 @@ public class ArtistsPanel extends JPanel {
     private JToolBar toolBar;
     private JButton sortButton;
     private String sortStatus = "Down";
+    public JButton addArtistButton;
+    private int selectedRow;
+    private JPopupMenu popupMenu;
+    private JMenuItem updateMenuItem;
+    private JMenuItem deleteMenuItem;
 
     public ArtistsPanel(MainWindow mainWindow) {
         this.mainWindow = mainWindow;
+        mainWindow.artistDao = new ArtistDao(mainWindow.actualUser);
         setLayout(new BorderLayout());
         saveUnknownArtistIfNotExists("Unknown Artist");
         saveAllArtistsArtistIfNotExists("All Artists");
@@ -41,13 +48,61 @@ public class ArtistsPanel extends JPanel {
 
         generateRestOfComponents();
         generateSortButton();
+
+        generateMenuItems();
+        generatePopMenu();
+    }
+
+    private void generateMenuItems() {
+        updateMenuItem = new JMenuItem("Update");
+        updateMenuItem.setIcon(new ImageIcon("src/images/updateIcon.png"));
+        updateMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new UpdateArtistDialog(mainWindow, artistList.get(selectedRow));
+            }
+        });
+
+        deleteMenuItem = new JMenuItem("Delete");
+        deleteMenuItem.setIcon(new ImageIcon("src/images/cancelIcon.png"));
+        deleteMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(selectedRow == 0 || selectedRow == 1){
+                    JOptionPane.showMessageDialog(null, "Removal impossible.");
+                }else {
+                    int reply = JOptionPane.showConfirmDialog(null, "Are you sure?", "Delete", JOptionPane.YES_NO_OPTION);
+                    if (reply == JOptionPane.YES_OPTION) {
+                        System.out.println("Artist to delete: " + artistList.get(selectedRow).getName());
+                        mainWindow.songsPanel.deleteAllSongsWithArtist(artistList.get(selectedRow));
+                        mainWindow.artistDao.delete(artistList.get(selectedRow).getId());
+                        if(artistList.get(selectedRow) != null){
+                            mainWindow.artistDao.delete(artistList.get(selectedRow).getId());
+                        }
+                        revalidateAllPanels();
+                    }
+                }
+            }
+        });
+    }
+
+    public void revalidateAllPanels() {
+        revalidateMe();
+        mainWindow.songsPanel.revalidateMeWithEmptyList();
+        mainWindow.coversPanel.revalidateWithEmptyList();
+        mainWindow.tablePanel.revalidateMeWithEmptyModel();
+        mainWindow.tabsPanel.revalidateWithEmptyList();
+        mainWindow.songsPanel.addSongButton.setEnabled(false);
+        mainWindow.coversPanel.addCoverButton.setEnabled(false);
+        mainWindow.tabsPanel.addTabButton.setEnabled(false);
     }
 
     private void saveAllArtistsArtistIfNotExists(String name) {
-        if(artistDao.findArtistsWithName(name).size()==0){
+        if(mainWindow.artistDao.findArtistsWithName(name).size()==0){
             Artist artist = new Artist();
             artist.setName(name);
-            artistDao.create(artist);
+            artist.setUser(mainWindow.actualUser);
+            mainWindow.artistDao.create(artist);
         }
     }
 
@@ -59,21 +114,43 @@ public class ArtistsPanel extends JPanel {
         add(listScrollPane);
     }
 
+    private void generatePopMenu() {
+        popupMenu = new JPopupMenu();
+        popupMenu.add(updateMenuItem);
+        popupMenu.add(deleteMenuItem);
+    }
+
     private void saveUnknownArtistIfNotExists(String name) {
-        if(artistDao.findArtistsWithName(name).size()==0){
+        if(mainWindow.artistDao.findArtistsWithName(name).size()==0){
             Artist artist = new Artist();
             artist.setName(name);
-            artistDao.create(artist);
+            artist.setUser(mainWindow.actualUser);
+            mainWindow.artistDao.create(artist);
         }
     }
 
     private void generateToolBar() {
         toolBar = new JToolBar("Artists ToolBar");
-        toolBar.setLayout(new BorderLayout());
+        toolBar.setLayout(new MigLayout());
         JLabel label = new JLabel("Artists");
-        toolBar.add(label, BorderLayout.WEST);
-        toolBar.setFloatable(false);
 
+        addArtistButton = new JButton();
+        Image img = null;
+        try {
+            img = ImageIO.read(new File("src/images/plusIcon14.png"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        addArtistButton.setIcon(new ImageIcon(img));
+        addArtistButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new AddArtistDialog(mainWindow);
+            }
+        });
+        toolBar.add(label, BorderLayout.WEST);
+        toolBar.add(addArtistButton, BorderLayout.EAST);
+        toolBar.setFloatable(false);
     }
 
     private void generateListScroller() {
@@ -90,7 +167,26 @@ public class ArtistsPanel extends JPanel {
             @Override
             public void valueChanged(ListSelectionEvent e) {
                 mainWindow.songsPanel.setSongsListWithArtist(jList.getSelectedValue().toString());
-                mainWindow.tablePanel.setSongsListModel(mainWindow.songsPanel.songList);
+                mainWindow.tablePanel.setSongListModel(mainWindow.songsPanel.songList);
+                mainWindow.coversPanel.revalidateWithEmptyList();
+                mainWindow.tabsPanel.revalidateWithEmptyList();
+                mainWindow.coversPanel.addCoverButton.setEnabled(false);
+                mainWindow.songsPanel.addSongButton.setEnabled(true);
+                mainWindow.tabsPanel.addTabButton.setEnabled(false);
+            }
+        });
+
+        jList.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (SwingUtilities.isRightMouseButton(e)) {
+                    JList list = (JList)e.getSource();
+                    int row = list.locationToIndex(e.getPoint());
+                    list.setSelectedIndex(row);
+                    selectedRow = row;
+
+                    popupMenu.show(e.getComponent(), e.getX(), e.getY());
+                }
             }
         });
     }
@@ -105,17 +201,17 @@ public class ArtistsPanel extends JPanel {
 
     private void generateArtistList() {
         if(Objects.equals(sortStatus, "Down")){
-            artistList = artistDao.findAllArtistsOrderByName();
+            artistList = mainWindow.artistDao.findAllArtistsOrderByName();
         }else {
-            artistList = artistDao.findAllArtistsOrderByNameDesc();
+            artistList = mainWindow.artistDao.findAllArtistsOrderByNameDesc();
         }
 
         setAllArtistsArtistAndUnknownArtistInFirstPlace();
     }
 
     private void setAllArtistsArtistAndUnknownArtistInFirstPlace() {
-        List<Artist> unknownArtist = artistDao.findArtistsWithName("Unknown Artist");
-        List<Artist> allArtistsArtist = artistDao.findArtistsWithName("All Artists");
+        List<Artist> unknownArtist = mainWindow.artistDao.findArtistsWithName("Unknown Artist");
+        List<Artist> allArtistsArtist = mainWindow.artistDao.findArtistsWithName("All Artists");
         List<Artist> newArtistList = new ArrayList<>();
         newArtistList.add(allArtistsArtist.get(0));
         newArtistList.add(unknownArtist.get(0));
@@ -144,6 +240,7 @@ public class ArtistsPanel extends JPanel {
             public void actionPerformed(ActionEvent e) {
                 flipAndDrawArrowIcon();
                 setArtistsList();
+                revalidateAllPanels();
             }
         });
         toolBar.add(sortButton, BorderLayout.EAST);
@@ -176,5 +273,18 @@ public class ArtistsPanel extends JPanel {
             sortStatus = "Down";
         }
         setImageIcon();
+    }
+
+    public void setSelectedArtist(Artist artistToSelect) {
+        System.out.println("Artist to select" + artistToSelect.getName());
+        int i = 0;
+        for (Artist artist : artistList) {
+            System.out.println("Artist Name: " + artist.getName());
+            if(Objects.equals(artist.getName(), artistToSelect.getName())){
+                jList.setSelectedIndex(i);
+                return;
+            }
+            i++;
+        }
     }
 }

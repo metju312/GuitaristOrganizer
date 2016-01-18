@@ -43,8 +43,6 @@ public class BluePlayer extends JFrame {
     private JSplitPane verticalSplitPane;
 
 
-
-
     public BluePlayer(String title, TablePanel tablePanel) throws HeadlessException, BasicPlayerException {
         super(title);
         this.tablePanel = tablePanel;
@@ -64,6 +62,9 @@ public class BluePlayer extends JFrame {
         add(verticalSplitPane, BorderLayout.CENTER);
         add(buttonsPanel, BorderLayout.SOUTH);
 
+
+
+        getRootPane().setDefaultButton(play);
         setVisible(true);
     }
 
@@ -79,7 +80,7 @@ public class BluePlayer extends JFrame {
 
         player.setSongPath(this.songPath);
         try {
-            player.stop();
+            //player.stop();
             player.play();
         } catch (BasicPlayerException e) {
             e.printStackTrace();
@@ -159,11 +160,18 @@ public class BluePlayer extends JFrame {
         stop.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-//                try {
-//                    pauseClicked();
-//                } catch (BasicPlayerException e1) {
-//                    e1.printStackTrace();
-//                }
+                try {
+                    if(!player.isPaused()){
+                        player.stop();
+                    }
+                    else{
+                        player.stop();
+                        player.setSongPath(songPath);
+                        player.play();
+                    }
+                } catch (BasicPlayerException e1) {
+                    e1.printStackTrace();
+                }
             }
         });
     }
@@ -174,11 +182,11 @@ public class BluePlayer extends JFrame {
         pause.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-//                try {
-//                    pauseClicked();
-//                } catch (BasicPlayerException e1) {
-//                    e1.printStackTrace();
-//                }
+                try {
+                    playClicked();
+                } catch (BasicPlayerException e1) {
+                    e1.printStackTrace();
+                }
             }
         });
     }
@@ -203,12 +211,17 @@ public class BluePlayer extends JFrame {
     }
 
     public void playClicked() throws BasicPlayerException {
-        if(!player.isPaused()){
-            player.pause();
-        }
-        else{
+        if(player.isStoped){
             player.setSongPath(songPath);
             player.play();
+        }else{
+            if(!player.isPaused()){
+                player.pause();
+            }
+            else{
+                player.setSongPath(songPath);
+                player.play();
+            }
         }
     }
 

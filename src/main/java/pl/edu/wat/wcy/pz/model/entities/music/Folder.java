@@ -1,5 +1,7 @@
 package pl.edu.wat.wcy.pz.model.entities.music;
 
+import pl.edu.wat.wcy.pz.model.entities.accounts.User;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -10,6 +12,7 @@ import java.util.List;
 public class Folder implements Serializable {
     private int id;
     private String path;
+    private User user;
 
     public Folder() {
         super();
@@ -31,5 +34,15 @@ public class Folder implements Serializable {
 
     public void setPath(String path) {
         this.path = path;
+    }
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

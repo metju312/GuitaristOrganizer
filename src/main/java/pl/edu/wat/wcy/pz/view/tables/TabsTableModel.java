@@ -1,32 +1,32 @@
 package pl.edu.wat.wcy.pz.view.tables;
 
-import pl.edu.wat.wcy.pz.model.entities.music.Song;
+import pl.edu.wat.wcy.pz.model.entities.music.Tab;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
 import java.util.List;
 
 
-public class SongsTableModel extends AbstractTableModel{
+public class TabsTableModel extends AbstractTableModel{
 
     private String[] columnNames =
             {
-                    "Artist",
+                    "Cover",
                     "Title",
                     "Path",
                     "URL"
             };
 
-    private List<Song> songs;
+    private List<Tab> tabs;
 
-    public SongsTableModel()
+    public TabsTableModel()
     {
-        songs = new ArrayList<Song>();
+        tabs = new ArrayList<Tab>();
     }
 
-    public SongsTableModel(List<Song> songs)
+    public TabsTableModel(List<Tab> tabs)
     {
-        this.songs = songs;
+        this.tabs = tabs;
     }
 
     @Override
@@ -36,7 +36,7 @@ public class SongsTableModel extends AbstractTableModel{
 
     @Override
     public int getRowCount() {
-        return songs.size();
+        return tabs.size();
     }
 
     @Override
@@ -52,14 +52,14 @@ public class SongsTableModel extends AbstractTableModel{
 
     @Override
     public Object getValueAt(int row, int column) {
-        Song song = getSong(row);
+        Tab tab = getTab(row);
 
         switch (column)
         {
-            case 0: return song.getArtist().getName();
-            case 1: return song.getTitle();
-            case 2: return song.getPath();
-            case 3: return song.getUrl();
+            case 0: return tab.getCover().getTitle();
+            case 1: return tab.getTitle();
+            case 2: return tab.getPath();
+            case 3: return tab.getUrl();
             default: return null;
         }
 
@@ -70,7 +70,7 @@ public class SongsTableModel extends AbstractTableModel{
         fireTableStructureChanged();
     }
 
-    public Song getSong(int row){
-        return songs.get(row);
+    public Tab getTab(int row){
+        return tabs.get(row);
     }
 }

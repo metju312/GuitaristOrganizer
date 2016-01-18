@@ -1,5 +1,6 @@
 package pl.edu.wat.wcy.pz.view.tables;
 
+import pl.edu.wat.wcy.pz.model.entities.music.Cover;
 import pl.edu.wat.wcy.pz.model.entities.music.Song;
 
 import javax.swing.table.AbstractTableModel;
@@ -7,26 +8,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class SongsTableModel extends AbstractTableModel{
+public class CoversTableModel extends AbstractTableModel{
 
     private String[] columnNames =
             {
-                    "Artist",
+                    "Song",
                     "Title",
                     "Path",
                     "URL"
             };
 
-    private List<Song> songs;
+    private List<Cover> covers;
 
-    public SongsTableModel()
+    public CoversTableModel()
     {
-        songs = new ArrayList<Song>();
+        covers = new ArrayList<Cover>();
     }
 
-    public SongsTableModel(List<Song> songs)
+    public CoversTableModel(List<Cover> covers)
     {
-        this.songs = songs;
+        this.covers = covers;
     }
 
     @Override
@@ -36,7 +37,7 @@ public class SongsTableModel extends AbstractTableModel{
 
     @Override
     public int getRowCount() {
-        return songs.size();
+        return covers.size();
     }
 
     @Override
@@ -52,14 +53,14 @@ public class SongsTableModel extends AbstractTableModel{
 
     @Override
     public Object getValueAt(int row, int column) {
-        Song song = getSong(row);
+        Cover cover = getCover(row);
 
         switch (column)
         {
-            case 0: return song.getArtist().getName();
-            case 1: return song.getTitle();
-            case 2: return song.getPath();
-            case 3: return song.getUrl();
+            case 0: return cover.getSong().getTitle();
+            case 1: return cover.getTitle();
+            case 2: return cover.getPath();
+            case 3: return cover.getUrl();
             default: return null;
         }
 
@@ -70,7 +71,7 @@ public class SongsTableModel extends AbstractTableModel{
         fireTableStructureChanged();
     }
 
-    public Song getSong(int row){
-        return songs.get(row);
+    public Cover getCover(int row){
+        return covers.get(row);
     }
 }

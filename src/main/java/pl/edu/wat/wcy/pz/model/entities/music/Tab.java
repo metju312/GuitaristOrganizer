@@ -12,7 +12,7 @@ public class Tab implements Serializable {
     private String title;
     private String path;
     private String url;
-    private Song song;
+    private Cover cover;
 
     public Tab() {
         super();
@@ -54,11 +54,11 @@ public class Tab implements Serializable {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn
-    public Song getSong() {
-        return song;
+    public Cover getCover() {
+        return cover;
     }
 
-    public void setSong(Song song) {
-        this.song = song;
+    public void setCover(Cover song) {
+        this.cover = song;
     }
 }

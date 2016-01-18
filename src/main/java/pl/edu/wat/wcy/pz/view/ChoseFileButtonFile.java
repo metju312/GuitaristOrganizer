@@ -5,9 +5,9 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class ChooseFileButton extends JButton{
+public class ChoseFileButtonFile extends JButton{
     private JTextField textField;
-    public ChooseFileButton(JTextField textField) {
+    public ChoseFileButtonFile(JTextField textField) {
         super("...");
         this.textField = textField;
 
@@ -21,9 +21,7 @@ public class ChooseFileButton extends JButton{
 
     private void generateFileChooserWindow() {
         JFileChooser fileChooser = new JFileChooser();
-        //fileChooser.showOpenDialog(null);
-        fileChooser.setDialogTitle("Choose Dictionary");
-        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        fileChooser.setDialogTitle("Chose Dictionary");
         fileChooser.setAcceptAllFileFilterUsed(false);
         if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             String s = fileChooser.getSelectedFile().getAbsolutePath();

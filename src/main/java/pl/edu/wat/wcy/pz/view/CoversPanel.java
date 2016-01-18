@@ -1,7 +1,7 @@
 package pl.edu.wat.wcy.pz.view;
 
 import net.miginfocom.swing.MigLayout;
-import pl.edu.wat.wcy.pz.model.entities.music.Artist;
+import pl.edu.wat.wcy.pz.model.entities.music.Cover;
 import pl.edu.wat.wcy.pz.model.entities.music.Song;
 
 import javax.imageio.ImageIO;
@@ -18,30 +18,24 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
-public class SongsPanel extends JPanel {
+public class CoversPanel extends JPanel {
     private MainWindow mainWindow;
 
     private DefaultListModel listModel;
-    public List<Song> songList;
+    public List<Cover> coverList;
     private JList jList;
     private JScrollPane listScrollPane;
-    private Artist actualArtist;
+    private Song actualSong;
     private JToolBar toolBar;
     private JButton sortButton;
     private String sortStatus = "Down";
-    public JButton addSongButton;
+    public JButton addCoverButton;
     private int selectedRow;
     private JPopupMenu popupMenu;
     private JMenuItem updateMenuItem;
     private JMenuItem deleteMenuItem;
 
-    private boolean isSearchingTitleLike = false;
-    private boolean isSearchingArtistLike = false;
-    private String actualSearchingTitle = "";
-    private String actualSearchingArtist = "";
-
-
-    public SongsPanel(MainWindow mainWindow) {
+    public CoversPanel(MainWindow mainWindow) {
         this.mainWindow = mainWindow;
         setLayout(new BorderLayout());
 
@@ -49,19 +43,19 @@ public class SongsPanel extends JPanel {
         generateSortButton();
         add(toolBar, BorderLayout.NORTH);
 
-        generateRestOfComponentsWithEmptyListModel();
+        generateRestOfComponentsWithEmptyList();
 
         generateMenuItems();
         generatePopMenu();
-        setActualArtist();
     }
+
     private void generateMenuItems() {
         updateMenuItem = new JMenuItem("Update");
         updateMenuItem.setIcon(new ImageIcon("src/images/updateIcon.png"));
         updateMenuItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new UpdateSongDialog(mainWindow, songList.get(selectedRow));
+                new UpdateCoverDialog(mainWindow, coverList.get(selectedRow));
             }
         });
 
@@ -72,28 +66,21 @@ public class SongsPanel extends JPanel {
             public void actionPerformed(ActionEvent e) {
                 int reply = JOptionPane.showConfirmDialog(null, "Are you sure?", "Delete", JOptionPane.YES_NO_OPTION);
                 if (reply == JOptionPane.YES_OPTION) {
-                    mainWindow.coversPanel.deleteAllCoversWithSong(songList.get(selectedRow));
-                    mainWindow.songDao.delete(songList.get(selectedRow).getId());
-                    if(songList.get(selectedRow) != null){
-                        mainWindow.songDao.delete(songList.get(selectedRow).getId());
+                    mainWindow.tabsPanel.deleteAllTabsWithCover(coverList.get(selectedRow));
+                    mainWindow.coverDao.delete(coverList.get(selectedRow).getId());
+                    if (coverList.get(selectedRow) != null) {
+                        mainWindow.coverDao.delete(coverList.get(selectedRow).getId());
                     }
-                    revalidateMeWithActualArtist();
-                    mainWindow.coversPanel.revalidateWithEmptyList();
-                    mainWindow.tablePanel.revalidateMeWithEmptyModel();
-                    mainWindow.tabsPanel.revalidateWithEmptyList();
-                    mainWindow.coversPanel.addCoverButton.setEnabled(false);
-                    mainWindow.tabsPanel.addTabButton.setEnabled(false);
+                    revalidateAllPanels();
+                    revalidateMeWithActualSong();
                 }
             }
         });
     }
 
     public void revalidateAllPanels() {
-        revalidateMe();
-        mainWindow.coversPanel.revalidateWithEmptyList();
         mainWindow.tablePanel.revalidateMeWithEmptyModel();
         mainWindow.tabsPanel.revalidateWithEmptyList();
-        mainWindow.coversPanel.addCoverButton.setEnabled(false);
         mainWindow.tabsPanel.addTabButton.setEnabled(false);
     }
 
@@ -101,11 +88,6 @@ public class SongsPanel extends JPanel {
         popupMenu = new JPopupMenu();
         popupMenu.add(updateMenuItem);
         popupMenu.add(deleteMenuItem);
-    }
-
-    private void setActualArtist() {
-        List<Artist> list = mainWindow.artistDao.findArtistsWithName("All Artists");
-        actualArtist = list.get(0);
     }
 
     private void generateSortButton() {
@@ -116,18 +98,10 @@ public class SongsPanel extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 flipAndDrawArrowIcon();
-                if (isSearchingTitleLike) {
-                    setSongsListLike(actualSearchingTitle);
-
-                }else if(isSearchingArtistLike){
-                    setSongsListArtistLike(actualSearchingArtist);
-                }else {
-                    setSongsListWithArtist(actualArtist.getName());
-                }
+                setCoversListWithSong(actualSong.getTitle());
                 revalidateAllPanels();
-                revalidateMeWithActualArtist();
-        }
-    });
+            }
+        });
         toolBar.add(sortButton, BorderLayout.EAST);
     }
 
@@ -155,15 +129,15 @@ public class SongsPanel extends JPanel {
     }
 
     private void generateRestOfComponents() {
-        generateSongList();
+        generateCoverList();
         generateListModel();
         generateJList();
         generateListScroller();
         add(listScrollPane);
     }
 
-    private void generateRestOfComponentsWithEmptyListModel() {
-        generateSongList();
+    private void generateRestOfComponentsWithEmptyList() {
+        generateCoverList();
         generateEmptyListModel();
         generateJList();
         generateListScroller();
@@ -171,11 +145,11 @@ public class SongsPanel extends JPanel {
     }
 
     private void generateToolBar() {
-        toolBar = new JToolBar("Songs ToolBar");
+        toolBar = new JToolBar("Covers ToolBar");
         toolBar.setLayout(new MigLayout());
-        JLabel label = new JLabel("Songs");
-        addSongButton = new JButton();
-        addSongButton.setEnabled(false);
+        JLabel label = new JLabel("Covers");
+        addCoverButton = new JButton();
+        addCoverButton.setEnabled(false);
 
         Image img = null;
         try {
@@ -183,15 +157,15 @@ public class SongsPanel extends JPanel {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        addSongButton.setIcon(new ImageIcon(img));
-        addSongButton.addActionListener(new ActionListener() {
+        addCoverButton.setIcon(new ImageIcon(img));
+        addCoverButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new AddSongDialog(mainWindow, actualArtist);
+                new AddCoverDialog(mainWindow, actualSong);
             }
         });
         toolBar.add(label, BorderLayout.WEST);
-        toolBar.add(addSongButton, BorderLayout.EAST);
+        toolBar.add(addCoverButton, BorderLayout.EAST);
         toolBar.setFloatable(false);
     }
 
@@ -208,11 +182,9 @@ public class SongsPanel extends JPanel {
         jList.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
-                mainWindow.coversPanel.setCoversListWithSong(jList.getSelectedValue().toString());
-                mainWindow.coversPanel.addCoverButton.setEnabled(true);
-                mainWindow.tablePanel.setCoverListModel(mainWindow.coversPanel.coverList);
-                mainWindow.tabsPanel.revalidateWithEmptyList();
-                mainWindow.tabsPanel.addTabButton.setEnabled(false);
+                mainWindow.tabsPanel.setTabListWithCover(jList.getSelectedValue().toString());
+                mainWindow.tablePanel.setTabListModel(mainWindow.tabsPanel.tabList);
+                mainWindow.tabsPanel.addTabButton.setEnabled(true);
             }
         });
 
@@ -234,8 +206,8 @@ public class SongsPanel extends JPanel {
 
     private void generateListModel() {
         listModel = new DefaultListModel();
-        for (Song song : songList) {
-            listModel.addElement(song.getTitle());
+        for (Cover cover : coverList) {
+            listModel.addElement(cover.getTitle());
         }
     }
 
@@ -243,11 +215,11 @@ public class SongsPanel extends JPanel {
         listModel = new DefaultListModel();
     }
 
-    private void generateSongList() {
+    private void generateCoverList() {
         if(Objects.equals(sortStatus, "Down")){
-            songList = mainWindow.songDao.findAllSongsOrderByTitle();
+            coverList = mainWindow.coverDao.findAllCoversOrderByTitle();
         }else {
-            songList = mainWindow.songDao.findAllSongsOrderByTitleDesc();
+            coverList = mainWindow.coverDao.findAllCoversOrderByTitleDesc();
         }
     }
 
@@ -258,76 +230,37 @@ public class SongsPanel extends JPanel {
         repaint();
     }
 
-    public void setSongsListWithArtist(String chosenArtistName) {
-        if(Objects.equals(chosenArtistName, "All Artists")){
-            if(Objects.equals(sortStatus, "Down")){
-                songList = mainWindow.songDao.findAllSongsOrderByTitle();
-            }else {
-                songList = mainWindow.songDao.findAllSongsOrderByTitleDesc();
-            }
-            List<Artist> list = mainWindow.artistDao.findArtistsWithName(chosenArtistName);
-            actualArtist = list.get(0);
-        }else{
-            List<Artist> list = mainWindow.artistDao.findArtistsWithName(chosenArtistName);
-            if(Objects.equals(sortStatus, "Down")){
-                songList = mainWindow.songDao.findSongsWithArtistOrderByTitle(list.get(0));
-            }else {
-                songList = mainWindow.songDao.findSongsWithArtistOrderByTitleDesc(list.get(0));
-            }
-            actualArtist = list.get(0);
-        }
-
-        isSearchingTitleLike = false;
-        generateListModel();
-        jList.setModel(listModel);
-    }
-
-    public void setSongsListLike(String text) {
-        actualSearchingTitle = text;
-        if(Objects.equals(sortStatus, "Down")) {
-            songList = mainWindow.songDao.findAllSongsOrderByTitleLike(text);
+    public void setCoversListWithSong(String chosenSongTitle) {
+        List<Song> list = mainWindow.songDao.findSongsWithTitle(chosenSongTitle);
+        if(Objects.equals(sortStatus, "Down")){
+            coverList = mainWindow.coverDao.findCoversWithSongOrderByTitle(list.get(0));
         }else {
-            songList = mainWindow.songDao.findAllSongsOrderByTitleDescLike(text);
+            coverList = mainWindow.coverDao.findCoversWithSongOrderByTitleDesc(list.get(0));
         }
+        actualSong = list.get(0);
 
-        isSearchingTitleLike = true;
         generateListModel();
         jList.setModel(listModel);
     }
 
-
-    public void setSongsListArtistLike(String text) {
-        actualSearchingArtist = text;
-        if(Objects.equals(sortStatus, "Down")) {
-            songList = mainWindow.songDao.findAllSongsOrderByTitleWithArtistLike(text);
-        }else {
-            songList = mainWindow.songDao.findAllSongsOrderByTitleWithArtistDescLike(text);
-        }
-
-        isSearchingArtistLike = true;
-        generateListModel();
-        jList.setModel(listModel);
-    }
-
-    public void revalidateMeWithActualArtist() {
-        revalidateMe();
-        setSongsListWithArtist(actualArtist.getName());
-    }
-
-    public void deleteAllSongsWithArtist(Artist artistToDelete) {
-        List<Song> songsToDelete = mainWindow.songDao.findSongsWithArtistOrderByTitle(artistToDelete);
-
-        for (Song song : songsToDelete) {
-            System.out.println("Song to delete: " + song.getTitle());
-            mainWindow.coversPanel.deleteAllCoversWithSong(song);
-            mainWindow.songDao.delete(song);
-        }
-    }
-
-    public void revalidateMeWithEmptyList() {
+    public void revalidateWithEmptyList() {
         remove(listScrollPane);
-        generateRestOfComponentsWithEmptyListModel();
+        generateRestOfComponentsWithEmptyList();
         revalidate();
         repaint();
+    }
+
+    public void revalidateMeWithActualSong() {
+        revalidateMe();
+        setCoversListWithSong(actualSong.getTitle());
+    }
+
+    public void deleteAllCoversWithSong(Song songToDelete) {
+        List<Cover> coversToDelete = mainWindow.coverDao.findCoversWithSongOrderByTitle(songToDelete);
+
+        for (Cover cover : coversToDelete) {
+            mainWindow.tabsPanel.deleteAllTabsWithCover(cover);
+            mainWindow.coverDao.delete(cover);
+        }
     }
 }

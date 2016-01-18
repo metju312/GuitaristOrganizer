@@ -2,8 +2,6 @@ package pl.edu.wat.wcy.pz.view;
 
 import net.miginfocom.swing.MigLayout;
 import pl.edu.wat.wcy.pz.controller.MP3Parser;
-import pl.edu.wat.wcy.pz.model.dao.FolderDao;
-import pl.edu.wat.wcy.pz.model.dao.SongDao;
 import pl.edu.wat.wcy.pz.model.entities.music.Folder;
 import pl.edu.wat.wcy.pz.model.entities.music.Song;
 
@@ -15,14 +13,12 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
 import java.util.List;
 
 
 public class UpdateDatabaseDialog extends JDialog {
     private MainWindow mainWindow;
-
-    private SongDao songDao = new SongDao();
 
     private JLabel label;
     private JScrollPane scrollPane;
@@ -88,8 +84,7 @@ public class UpdateDatabaseDialog extends JDialog {
     }
 
     private void generateMp3Paths() {
-        FolderDao folderDao = new FolderDao();
-        List<Folder> folderList = folderDao.findAll();
+        List<Folder> folderList = mainWindow.folderDao.findUserFolders();
         File f;
         for (Folder folder : folderList) {
             if (!folder.getPath().equals("")){
@@ -101,7 +96,7 @@ public class UpdateDatabaseDialog extends JDialog {
 
 
     private void addSongsAndArtistsToDatabase() {
-        MP3Parser parser = new MP3Parser();
+        MP3Parser parser = new MP3Parser(mainWindow);
         for (String mp3Path : mp3Paths) {
             parser.addSongAndArtistToDatabase(mp3Path);
         }
@@ -131,7 +126,7 @@ public class UpdateDatabaseDialog extends JDialog {
     }
 
     private boolean songAlreadyExists(String path) {
-        List<Song> resultList = songDao.findSongsWithPath(path);
+        List<Song> resultList = mainWindow.songDao.findSongsWithPath(path);
         if(resultList.size()==0){
             return false;
         }
@@ -140,18 +135,9 @@ public class UpdateDatabaseDialog extends JDialog {
 
 
     private void updateFolders() {
-        //saveFolder();
-
         deleteAllFolders();
         saveFolders();
         generateSongs();
-    }
-
-    private void saveFolder() {
-        FolderDao folderDao = new FolderDao();
-        Folder folder = new Folder();
-        folder.setPath("cps");
-        folderDao.create(folder);
     }
 
     private void generateSongs() {
@@ -159,20 +145,19 @@ public class UpdateDatabaseDialog extends JDialog {
     }
 
     private void saveFolders() {
-        FolderDao folderDao = new FolderDao();
         Folder folder;
         for (JTextField textField : textFieldList) {
             folder = new Folder();
             folder.setPath(textField.getText());
-            folderDao.create(folder);
+            folder.setUser(mainWindow.actualUser);
+            mainWindow.folderDao.create(folder);
         }
     }
 
     private void deleteAllFolders() {
-        FolderDao folderDao = new FolderDao();
-        List<Folder> folderList = folderDao.findAll();
+        List<Folder> folderList = mainWindow.folderDao.findUserFolders();
         for (Folder folder : folderList) {
-            folderDao.delete(folder.getId());
+            mainWindow.folderDao.delete(folder.getId());
         }
     }
 
@@ -191,7 +176,7 @@ public class UpdateDatabaseDialog extends JDialog {
             try {
                 generateTextField();
                 textPane.insertComponent(textFieldList.get(i));
-                textPane.insertComponent(new ChooseFileButton(textFieldList.get(i)));
+                textPane.insertComponent(new ChoseFileButtonPath(textFieldList.get(i)));
                 textPane.setCaretPosition(textPane.getDocument().getLength());
                 doc.insertString(doc.getLength(), "\n", attr );
                 textPane.insertComponent(new JSeparator());
@@ -204,11 +189,9 @@ public class UpdateDatabaseDialog extends JDialog {
     }
 
     private void setTextFieldsTexts() {
-        FolderDao folderDao = new FolderDao();
-        List<Folder> folderList = folderDao.findAll();
+        List<Folder> folderList = mainWindow.folderDao.findUserFolders();
         int i = 0;
         for (Folder folder : folderList) {
-            System.out.println(folder.getPath());
             textFieldList.get(i).setText(folder.getPath());
             i++;
         }

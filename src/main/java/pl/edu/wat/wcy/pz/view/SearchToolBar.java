@@ -2,7 +2,6 @@ package pl.edu.wat.wcy.pz.view;
 
 import net.miginfocom.swing.MigLayout;
 import pl.edu.wat.wcy.pz.controller.BrowserSearcher;
-import pl.edu.wat.wcy.pz.model.dao.WebsiteDao;
 import pl.edu.wat.wcy.pz.model.entities.web.Website;
 
 import javax.swing.*;
@@ -15,7 +14,6 @@ import java.util.Objects;
 
 public class SearchToolBar extends JToolBar {
     private MainWindow mainWindow;
-    private WebsiteDao websiteDao = new WebsiteDao();
 
     private JTextField textField;
     private JComboBox comboBoxTitleAndArtist;
@@ -87,9 +85,14 @@ public class SearchToolBar extends JToolBar {
         if(Objects.equals(textField.getText(), "")){
             JOptionPane.showMessageDialog(websiteSearchButton, "Text field is empty.");
         }else{
-            BrowserSearcher browserSearcher = new BrowserSearcher();
+            BrowserSearcher browserSearcher = new BrowserSearcher(mainWindow);
             browserSearcher.searchString(textField.getText(), comboBoxWebsites.getSelectedItem(), comboBoxTitleAndArtist.getSelectedItem());
         }
+    }
+
+    public void searchTitleInWeb(String title){
+        BrowserSearcher browserSearcher = new BrowserSearcher(mainWindow);
+        browserSearcher.searchTitle(title, comboBoxWebsites.getSelectedItem());
     }
 
     private void setDefaultWebsitesIfNotExists() {
@@ -109,7 +112,7 @@ public class SearchToolBar extends JToolBar {
     }
 
     private boolean defaultWebsitesExists() {
-        java.util.List<Website> w = websiteDao.findWebsitesWithTitle("YouTube");
+        java.util.List<Website> w = mainWindow.websiteDao.findWebsitesWithTitle("YouTube");
         if (w.size() == 0) {
             return false;
         }
@@ -151,18 +154,18 @@ public class SearchToolBar extends JToolBar {
 
     private void selectTitlesWhereArtistLike(String text) {
         mainWindow.songsPanel.setSongsListArtistLike(text);
-        mainWindow.tablePanel.setSongsListModel(mainWindow.songsPanel.songList);
+        mainWindow.tablePanel.setSongListModel(mainWindow.songsPanel.songList);
     }
 
     private void selectTitlesLike(String text) {
         mainWindow.songsPanel.setSongsListLike(text);
-        mainWindow.tablePanel.setSongsListModel(mainWindow.songsPanel.songList);
+        mainWindow.tablePanel.setSongListModel(mainWindow.songsPanel.songList);
     }
 
     private void addComboBoxWebsite() {
         String[] websiteList = generateWebList();
         comboBoxWebsites = new JComboBox(websiteList);
-        comboBoxWebsites.setSelectedIndex(0);
+        //comboBoxWebsites.setSelectedIndex(0);
         //comboBoxWebsites.setFont(new Font("TimesRoman", Font.PLAIN, 10));
         add(comboBoxWebsites);
     }
@@ -172,13 +175,13 @@ public class SearchToolBar extends JToolBar {
         website.setTitle(title);
         website.setUrlTitle(urlTitle);
         website.setUrlArtist(urlArtist);
-        websiteDao.create(website);
+        website.setUser(mainWindow.actualUser);
+        mainWindow.websiteDao.create(website);
     }
 
     private String[] generateWebList() {
-        WebsiteDao websiteDao = new WebsiteDao();
         java.util.List<Website> websiteList;
-        websiteList = websiteDao.findAll();
+        websiteList = mainWindow.websiteDao.findAllWebsites();
         String[] strings = new String[websiteList.size()];
         int i = 0;
         for (Website website : websiteList) {

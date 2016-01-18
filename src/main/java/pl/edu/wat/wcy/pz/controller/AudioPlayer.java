@@ -15,6 +15,7 @@ public class AudioPlayer extends BasicPlayer {
 	private boolean paused = true;
 	private boolean opened = false;
 	private boolean isSeeking = false;
+	public boolean isStoped = true;
 	
 	//Current Audio Properties
 	private float audioDurationInSeconds = 0;
@@ -96,17 +97,20 @@ public class AudioPlayer extends BasicPlayer {
 		if(paused)
 			super.resume();
 		paused = false;
+		isStoped = false;
 	}
 	
 	@Override
 	public void pause() throws BasicPlayerException {
 		paused = true;
+		isStoped = false;
 		super.pause();
 	}
 	
 	@Override
 	public void stop() throws BasicPlayerException {
 		paused = false;
+		isStoped = true;
 		super.stop();
 	}
 	

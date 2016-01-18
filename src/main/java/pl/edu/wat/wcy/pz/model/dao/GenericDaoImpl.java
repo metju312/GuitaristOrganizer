@@ -48,7 +48,8 @@ public class GenericDaoImpl<T> implements GenericDao<T> {
         EntityTransaction transaction = em.getTransaction();
         try {
             transaction.begin();
-            em.remove(em.getReference(type, id));
+            em.remove(em.merge(em.getReference(type, id)));
+            em.flush();
             transaction.commit();
             logger.info("Delete " + id);
         } catch (Exception e) {

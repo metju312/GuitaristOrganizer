@@ -2,11 +2,17 @@ package pl.edu.wat.wcy.pz.view;
 
 
 import javazoom.jlgui.basicplayer.BasicPlayerException;
+import pl.edu.wat.wcy.pz.controller.BrowserSearcher;
+import pl.edu.wat.wcy.pz.model.entities.music.Cover;
 import pl.edu.wat.wcy.pz.model.entities.music.Song;
+import pl.edu.wat.wcy.pz.model.entities.music.Tab;
 import pl.edu.wat.wcy.pz.view.bluePlayer.BluePlayer;
+import pl.edu.wat.wcy.pz.view.tables.CoversTableModel;
 import pl.edu.wat.wcy.pz.view.tables.SongsTableModel;
+import pl.edu.wat.wcy.pz.view.tables.TabsTableModel;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -14,27 +20,46 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TablePanel extends JPanel implements ActionListener {
+    private MainWindow mainWindow;
+    private BrowserSearcher browserSearcher = new BrowserSearcher(mainWindow);
 
     private JScrollPane listScroller;
     private JToolBar toolBar;
-    private JTable table;
-    private JPopupMenu popupMenu;
 
+
+
+
+
+    private JTable table;
+
+    public JLabel toolBarLabel;
+
+
+    private JPopupMenu popupMenu;
     private JMenuItem play;
     private JMenuItem wmpPlay;
     private JMenuItem open;
-    private JMenuItem selectArtist;
     private JMenuItem webSearch;
+    private JMenuItem urlSearch;
+
+    public String urlToOpen;
+    public String titleToWebSearch;
+    public String pathToOpen;
 
     private BluePlayer bluePlayer;
     public boolean isBluePlayerOpen = false;
 
-    private java.util.List<Song> actualSongsList;
+    private List<Song> actualSongList;
+    private List<Cover> actualCoverList;
+    private List<Tab> actualTabList;
     private int selectedRow;
 
-    public TablePanel() {
+    public TablePanel(MainWindow mainWindow) {
+        this.mainWindow = mainWindow;
         setLayout(new BorderLayout());
         generateMenuItems();
         generatePopMenu();
@@ -60,9 +85,8 @@ public class TablePanel extends JPanel implements ActionListener {
         wmpPlay.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String path = actualSongsList.get(selectedRow).getPath();
                 try {
-                    Desktop.getDesktop().open(new File(path));
+                    Desktop.getDesktop().open(new File(pathToOpen));
                 } catch (IOException e1) {
                     e1.printStackTrace();
                 }
@@ -74,20 +98,11 @@ public class TablePanel extends JPanel implements ActionListener {
         open.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String path = actualSongsList.get(selectedRow).getPath();
                 try {
-                    Desktop.getDesktop().open(new File(path).getParentFile());
+                    Desktop.getDesktop().open(new File(pathToOpen).getParentFile());
                 } catch (IOException e1) {
                     e1.printStackTrace();
                 }
-            }
-        });
-
-        selectArtist = new JMenuItem("Select Artist");
-        selectArtist.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-
             }
         });
 
@@ -96,7 +111,16 @@ public class TablePanel extends JPanel implements ActionListener {
         webSearch.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                mainWindow.searchToolBar.searchTitleInWeb(titleToWebSearch);
+            }
+        });
 
+        urlSearch = new JMenuItem("Url Search");
+        urlSearch.setIcon(new ImageIcon("src/images/urlIcon.png"));
+        urlSearch.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                browserSearcher.openUrl(urlToOpen);
             }
         });
     }
@@ -105,14 +129,15 @@ public class TablePanel extends JPanel implements ActionListener {
         if(!isBluePlayerOpen){
             try {
                 bluePlayer = new BluePlayer("Blue BluePlayer", this);
-                bluePlayer.startPlay(actualSongsList.get(selectedRow).getPath());
+                bluePlayer.startPlay(pathToOpen);
                 isBluePlayerOpen = true;
             } catch (BasicPlayerException e1) {
                 e1.printStackTrace();
             }
         }else{
-            bluePlayer.startPlay(actualSongsList.get(selectedRow).getPath());
+            bluePlayer.startPlay(pathToOpen);
         }
+        mainWindow.bluePlayer = bluePlayer;
     }
 
 
@@ -122,9 +147,9 @@ public class TablePanel extends JPanel implements ActionListener {
         popupMenu.add(wmpPlay);
         popupMenu.addSeparator();
         popupMenu.add(open);
-        popupMenu.add(selectArtist);
         popupMenu.addSeparator();
         popupMenu.add(webSearch);
+        popupMenu.add(urlSearch);
     }
 
     private void generateTable() {
@@ -134,8 +159,8 @@ public class TablePanel extends JPanel implements ActionListener {
 
     private void generateAndAddToolBar() {
         toolBar = new JToolBar("Still draggable");
-        JLabel label = new JLabel("Songs");
-        toolBar.add(label);
+        toolBarLabel = new JLabel("Songs");
+        toolBar.add(toolBarLabel);
         toolBar.setFloatable(false);
         add(toolBar, BorderLayout.NORTH);
     }
@@ -146,9 +171,9 @@ public class TablePanel extends JPanel implements ActionListener {
         add(listScroller);
     }
 
-    public void setSongsListModel(java.util.List<Song> songs){
-        actualSongsList = songs;
-        table.setModel(new SongsTableModel(actualSongsList));
+    public void setSongListModel(List<Song> songs){
+        actualSongList = songs;
+        table.setModel(new SongsTableModel(songs));
         table.addMouseListener(new MouseAdapter() {
             public void mouseReleased(MouseEvent e) {
                 if (e.isPopupTrigger()) {
@@ -156,6 +181,59 @@ public class TablePanel extends JPanel implements ActionListener {
                     int row = source.rowAtPoint(e.getPoint());
                     int column = source.columnAtPoint(e.getPoint());
                     selectedRow = row;
+
+                    urlToOpen = actualSongList.get(row).getUrl();
+                    titleToWebSearch = actualSongList.get(row).getTitle();
+                    pathToOpen = actualSongList.get(row).getPath();
+
+                    if (!source.isRowSelected(row))
+                        source.changeSelection(row, column, false, false);
+
+                    popupMenu.show(e.getComponent(), e.getX(), e.getY());
+                }
+            }
+        });
+    }
+
+    public void setCoverListModel(List<Cover> covers){
+        actualCoverList = covers;
+        table.setModel(new CoversTableModel(covers));
+        table.addMouseListener(new MouseAdapter() {
+            public void mouseReleased(MouseEvent e) {
+                if (e.isPopupTrigger()) {
+                    JTable source = (JTable) e.getSource();
+                    int row = source.rowAtPoint(e.getPoint());
+                    int column = source.columnAtPoint(e.getPoint());
+                    selectedRow = row;
+
+                    urlToOpen = actualCoverList.get(row).getUrl();
+                    titleToWebSearch = actualCoverList.get(row).getTitle();
+                    pathToOpen = actualCoverList.get(row).getPath();
+
+                    if (!source.isRowSelected(row))
+                        source.changeSelection(row, column, false, false);
+
+                    popupMenu.show(e.getComponent(), e.getX(), e.getY());
+                }
+            }
+        });
+    }
+
+    public void setTabListModel(List<Tab> tabs){
+        actualTabList = tabs;
+        table.setModel(new TabsTableModel(tabs));
+        table.addMouseListener(new MouseAdapter() {
+            public void mouseReleased(MouseEvent e) {
+                if (e.isPopupTrigger()) {
+                    JTable source = (JTable) e.getSource();
+                    int row = source.rowAtPoint(e.getPoint());
+                    int column = source.columnAtPoint(e.getPoint());
+                    selectedRow = row;
+
+                    urlToOpen = actualTabList.get(row).getUrl();
+                    titleToWebSearch = actualTabList.get(row).getTitle();
+                    pathToOpen = actualTabList.get(row).getPath();
+
                     if (!source.isRowSelected(row))
                         source.changeSelection(row, column, false, false);
 
@@ -171,5 +249,11 @@ public class TablePanel extends JPanel implements ActionListener {
         JPopupMenu popup = (JPopupMenu)c.getParent();
         JTable table = (JTable)popup.getInvoker();
         System.out.println(table.getSelectedRow() + " : " + table.getSelectedColumn());
+    }
+
+    public void revalidateMeWithEmptyModel() {
+          table.setModel(new DefaultTableModel());
+//        List<Song> list = new ArrayList<Song>();
+//        setSongListModel(list);
     }
 }

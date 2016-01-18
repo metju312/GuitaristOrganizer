@@ -14,14 +14,19 @@ import pl.edu.wat.wcy.pz.model.dao.ArtistDao;
 import pl.edu.wat.wcy.pz.model.dao.SongDao;
 import pl.edu.wat.wcy.pz.model.entities.music.Artist;
 import pl.edu.wat.wcy.pz.model.entities.music.Song;
+import pl.edu.wat.wcy.pz.view.MainWindow;
 
 import java.io.*;
 import java.util.List;
 import java.util.Objects;
 
 public class MP3Parser {
-    private SongDao songDao = new SongDao();
-    private ArtistDao artistDao = new ArtistDao();
+
+    private MainWindow mainWindow;
+
+    public MP3Parser(MainWindow mainWindow) {
+        this.mainWindow = mainWindow;
+    }
 
     public void addSongAndArtistToDatabase(String mp3Path) {
 
@@ -38,7 +43,8 @@ public class MP3Parser {
             Artist artist = generateNewArtist(metadata);
             artist = changeArtistIfAlreadyExists(artist);
             if(artist!=null){
-                artistDao.create(artist);
+                artist.setUser(mainWindow.actualUser);
+                mainWindow. artistDao.create(artist);
             }
 
             generateSongAndCreateIfNotExists(metadata, artist, mp3Path);
@@ -64,7 +70,7 @@ public class MP3Parser {
 
     private Artist changeArtistIfAlreadyExists(Artist artist) {
         if(artist!=null){
-            List<Artist> artists = artistDao.findArtistsWithName(artist.getName());
+            List<Artist> artists = mainWindow.artistDao.findArtistsWithName(artist.getName());
             if(artists.size() == 0){
                 return artist;
             }else{
@@ -83,19 +89,21 @@ public class MP3Parser {
         }
 
         if(metadata.get("xmpDM:artist")==null || Objects.equals(metadata.get("xmpDM:artist"), "")){
-            song.setArtist(artistDao.findArtistsWithName("Unknown Artist").get(0));
+            song.setArtist(mainWindow.artistDao.findArtistsWithName("Unknown Artist").get(0));
         }else{
             song.setArtist(artist);
         }
 
+
         song.setPath(mp3Path);
+        song.setUrl("");
         if(!songAlreadyExists(song)){
-            songDao.create(song);
+            mainWindow.songDao.create(song);
         }
     }
 
     private boolean songAlreadyExists(Song song) {
-        List<Song> songList = songDao.findSongsWithTitle(song.getTitle());
+        List<Song> songList = mainWindow.songDao.findSongsWithTitle(song.getTitle());
         if(songList.size() == 0){
             return false;
         }

@@ -13,6 +13,7 @@ public class Cover implements Serializable {
     private String path;
     private String url;
     private Song song;
+    private List<Tab> tabList = new ArrayList<>();
 
     public Cover() {
         super();
@@ -60,5 +61,14 @@ public class Cover implements Serializable {
 
     public void setSong(Song song) {
         this.song = song;
+    }
+
+    @OneToMany(mappedBy = "cover", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval=true)
+    public List<Tab> getTabList() {
+        return tabList;
+    }
+
+    public void setTabList(List<Tab> tabList) {
+        this.tabList = tabList;
     }
 }

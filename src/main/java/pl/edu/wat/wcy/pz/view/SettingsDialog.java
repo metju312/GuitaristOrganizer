@@ -2,11 +2,17 @@ package pl.edu.wat.wcy.pz.view;
 
 import de.javasoft.plaf.synthetica.*;
 import net.miginfocom.swing.MigLayout;
+import pl.edu.wat.wcy.pz.model.entities.accounts.User;
+import pl.edu.wat.wcy.pz.model.entities.web.Website;
 
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.*;
+import java.util.List;
 
 public class SettingsDialog extends JDialog {
     private MainWindow mainWindow;
@@ -19,23 +25,13 @@ public class SettingsDialog extends JDialog {
     JTabbedPane customizeGuiTabbedPane;
 
     private JComboBox lafComboBox;
-    private String[] lafTitles = {"Alu Oxide"
-                                , "Black Eye"
-                                , "Black Moon"
-                                , "Black Star"
-                                , "Blue Ice"
-                                , "Blue Light"
-                                , "Blue Steel"
-                                , "Classy"
-                                , "Green Dream"
-                                , "Mauve Metallic"
-                                , "Orange Metallic"
-                                , "Plain"
-                                , "Silver Moon"
-                                , "Simple 2D"
-                                , "Sky Metallic"
-                                , "White Vision"
-                                 };
+    private JTextField titleTextField;
+    private JTextArea titleTextArea;
+    private JTextArea artistTextArea;
+
+    private DefaultListModel listModel;
+    private JList list;
+    private JTabbedPane urlsTabbedPane;
 
     public SettingsDialog(MainWindow mainWindow) {
         super(mainWindow, "Settings", true);
@@ -96,96 +92,148 @@ public class SettingsDialog extends JDialog {
         JPanel lafPanel = new JPanel(new MigLayout());
         lafPanel.setBorder(BorderFactory.createTitledBorder("Look And Feel"));
         JLabel choseLaf = new JLabel("Chose Look and Feel");
-        lafComboBox = new JComboBox(lafTitles);
+        lafComboBox = new JComboBox(mainWindow.lafTitles);
         lafComboBox.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                setLookAndFeel();
+                lafComboBoxCicked();
             }
         });
-        lafComboBox.setSelectedIndex(0);
-
-
 
         lafPanel.add(choseLaf, "wrap");
         lafPanel.add(lafComboBox);
         lookAndFeel.add(lafPanel);
 
-        customizeGuiTabbedPane.addTab("LookAndFeel", lookAndFeel);
+        customizeGuiTabbedPane.addTab("GUI Settings", lookAndFeel);
     }
 
-    private void setLookAndFeel() {
-
-        try {
-            UIManager.removeAuxiliaryLookAndFeel(UIManager.getLookAndFeel());
-            SyntheticaLookAndFeel.setWindowsDecorated(false);
-            UIManager.setLookAndFeel(new SyntheticaBlackMoonLookAndFeel());
-
-                switch (lafComboBox.getSelectedIndex()) {
-                    case 0:
-                        UIManager.setLookAndFeel(new SyntheticaAluOxideLookAndFeel());
-                        break;
-                    case 1:
-                        UIManager.setLookAndFeel(new SyntheticaBlackEyeLookAndFeel());
-                        break;
-                    case 2:
-                        UIManager.setLookAndFeel(new SyntheticaBlackMoonLookAndFeel());
-                        break;
-                    case 3:
-                        UIManager.setLookAndFeel(new SyntheticaBlackStarLookAndFeel());
-                        break;
-                    case 4:
-                        UIManager.setLookAndFeel(new SyntheticaBlueIceLookAndFeel());
-                        break;
-                    case 5:
-                        UIManager.setLookAndFeel(new SyntheticaBlueLightLookAndFeel());
-                        break;
-                    case 6:
-                        UIManager.setLookAndFeel(new SyntheticaBlueSteelLookAndFeel());
-                        break;
-                    case 7:
-                        UIManager.setLookAndFeel(new SyntheticaClassyLookAndFeel());
-                        break;
-                    case 8:
-                        UIManager.setLookAndFeel(new SyntheticaGreenDreamLookAndFeel());
-                        break;
-                    case 9:
-                        UIManager.setLookAndFeel(new SyntheticaMauveMetallicLookAndFeel());
-                        break;
-                    case 10:
-                        UIManager.setLookAndFeel(new SyntheticaOrangeMetallicLookAndFeel());
-                        break;
-                    case 11:
-                        UIManager.setLookAndFeel(new SyntheticaPlainLookAndFeel());
-                        break;
-                    case 12:
-                        UIManager.setLookAndFeel(new SyntheticaSilverMoonLookAndFeel());
-                        break;
-                    case 13:
-                        UIManager.setLookAndFeel(new SyntheticaSimple2DLookAndFeel());
-                        break;
-                    case 14:
-                        UIManager.setLookAndFeel(new SyntheticaSkyMetallicLookAndFeel());
-                        break;
-                    case 15:
-                        UIManager.setLookAndFeel(new SyntheticaWhiteVisionLookAndFeel());
-                        break;
-                }
-            SwingUtilities.updateComponentTreeUI(mainWindow);
-            SwingUtilities.updateComponentTreeUI(this);
-        } catch (Exception ex) {
-            try {
-                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+    private void lafComboBoxCicked() {
+        mainWindow.setLookAndFeel(lafComboBox.getSelectedIndex());
+        User newUser = mainWindow.actualUser;
+        newUser.setLafIndex(lafComboBox.getSelectedIndex());
+        mainWindow.actualUser = mainWindow.userDao.update(newUser);
+        SwingUtilities.updateComponentTreeUI(this);
     }
 
     private void generateSearchOptionsTabbedPane() {
         searchOptionsTabbedPane = new JTabbedPane();
-        JPanel searchOptions = new JPanel();
-        searchOptionsTabbedPane.addTab("Search Options", searchOptions);
+        JPanel searchOptions = new JPanel(new BorderLayout());
+
+        JPanel listPanel = new JPanel();
+        generateListModel();
+        list = new JList(listModel);
+        list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        list.setLayoutOrientation(JList.VERTICAL);
+        list.setVisibleRowCount(-1);
+        list.addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                generateTitleArtistAndTitleUrls();
+            }
+        });
+        listPanel.add(list);
+
+
+        JPanel websiteAddPanel = generateWebsiteAddPanel();
+        JPanel updateWebsitePanel = generateUpdateWebsitePanel();
+
+        searchOptions.add(updateWebsitePanel, BorderLayout.SOUTH);
+        searchOptions.add(websiteAddPanel, BorderLayout.EAST);
+        searchOptions.add(listPanel, BorderLayout.WEST);
+        searchOptionsTabbedPane.addTab("Web Search Options", searchOptions);
+    }
+
+    private void generateListModel() {
+        listModel = new DefaultListModel();
+
+        java.util.List<Website> websiteList = mainWindow.websiteDao.findAllWebsites();
+        for (Website website : websiteList) {
+            listModel.addElement(website.getTitle());
+        }
+    }
+
+    private void generateTitleArtistAndTitleUrls() {
+        List<Website> websiteList = mainWindow.websiteDao.findAllWebsites();
+        titleTextField.setText(websiteList.get(list.getSelectedIndex()).getTitle());
+
+        titleTextArea.setText(websiteList.get(list.getSelectedIndex()).getUrlTitle());
+        titleTextArea.setText(websiteList.get(list.getSelectedIndex()).getUrlArtist());
+    }
+
+    private JPanel generateUpdateWebsitePanel() {
+        JPanel panel = new JPanel(new MigLayout());
+        JLabel label = new JLabel("Title");
+        titleTextField = new JTextField(40);
+        JLabel labelSearchURL = new JLabel("Search URLs:");
+        urlsTabbedPane = new JTabbedPane();
+
+        titleTextArea = new JTextArea();
+        artistTextArea = new JTextArea();
+
+        urlsTabbedPane.addTab("Title", titleTextArea);
+        urlsTabbedPane.addTab("Artist", artistTextArea);
+
+        panel.add(label, "wrap");
+        panel.add(titleTextField, "wrap");
+        panel.add(new JPanel(), "wrap");
+        panel.add(labelSearchURL, "wrap");
+        panel.add(generateUrlsPanel());
+
+        return panel;
+    }
+
+    private JPanel generateUrlsPanel() {
+        JPanel panel = new JPanel();
+        panel.add(urlsTabbedPane);
+
+
+        return panel;
+    }
+
+    private JPanel generateWebsiteAddPanel() {
+        JPanel panel = new JPanel(new MigLayout());
+
+        JButton newWebsite = new JButton();  //TODO icon
+        newWebsite.setText("New");
+        newWebsite.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+            }
+        });
+
+        JButton deleteWebsite = new JButton();
+        deleteWebsite.setText("Delete");
+        deleteWebsite.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+            }
+        });
+
+        JButton upWebsite = new JButton();
+        upWebsite.setText("Up");
+        upWebsite.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+            }
+        });
+
+        JButton downWebsite = new JButton();
+        downWebsite.setText("Down");
+        upWebsite.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+            }
+        });
+
+        panel.add(newWebsite, "wrap");
+        panel.add(deleteWebsite, "wrap");
+        panel.add(upWebsite, "wrap");
+        panel.add(downWebsite, "wrap");
+        return panel;
     }
 
     private void generateBasicOptionsTabbedPane() {
