@@ -80,7 +80,7 @@ public class BluePlayer extends JFrame {
 
         player.setSongPath(this.songPath);
         try {
-            //player.stop();
+            player.stop();
             player.play();
         } catch (BasicPlayerException e) {
             e.printStackTrace();

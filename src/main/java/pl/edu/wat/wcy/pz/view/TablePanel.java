@@ -88,7 +88,7 @@ public class TablePanel extends JPanel implements ActionListener {
                 try {
                     Desktop.getDesktop().open(new File(pathToOpen));
                 } catch (IOException e1) {
-                    e1.printStackTrace();
+                    JOptionPane.showMessageDialog(wmpPlay, "Wrong song path.");
                 }
             }
         });
@@ -101,7 +101,7 @@ public class TablePanel extends JPanel implements ActionListener {
                 try {
                     Desktop.getDesktop().open(new File(pathToOpen).getParentFile());
                 } catch (IOException e1) {
-                    e1.printStackTrace();
+                    JOptionPane.showMessageDialog(open, "Wrong path.");
                 }
             }
         });

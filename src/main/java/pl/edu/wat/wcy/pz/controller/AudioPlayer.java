@@ -2,6 +2,7 @@ package pl.edu.wat.wcy.pz.controller;
 
 import javazoom.jlgui.basicplayer.*;
 
+import javax.swing.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Map;
@@ -87,17 +88,21 @@ public class AudioPlayer extends BasicPlayer {
 	
 	
 	@Override
-	public void play() throws BasicPlayerException {
-		if(!paused || !opened){
-			File f = new File(songPath);
-			open(f);
-			opened = true;
-			super.play();
+	public void play(){
+		try {
+			if(!paused || !opened){
+				File f = new File(songPath);
+					open(f);
+				opened = true;
+				super.play();
+			}
+			if(paused)
+				super.resume();
+			paused = false;
+			isStoped = false;
+		} catch (BasicPlayerException e) {
+			JOptionPane.showMessageDialog(null, "Wrong song path.");
 		}
-		if(paused)
-			super.resume();
-		paused = false;
-		isStoped = false;
 	}
 	
 	@Override

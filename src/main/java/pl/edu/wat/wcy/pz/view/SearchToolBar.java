@@ -23,6 +23,8 @@ public class SearchToolBar extends JToolBar {
     private JButton clearButton;
     private JTextPane textPane;
 
+    String[] websiteList;
+
     public SearchToolBar(String name, MainWindow mainWindow) {
         super(name);
         this.mainWindow = mainWindow;
@@ -163,7 +165,7 @@ public class SearchToolBar extends JToolBar {
     }
 
     private void addComboBoxWebsite() {
-        String[] websiteList = generateWebList();
+        generateWebList();
         comboBoxWebsites = new JComboBox(websiteList);
         //comboBoxWebsites.setSelectedIndex(0);
         //comboBoxWebsites.setFont(new Font("TimesRoman", Font.PLAIN, 10));
@@ -179,16 +181,16 @@ public class SearchToolBar extends JToolBar {
         mainWindow.websiteDao.create(website);
     }
 
-    private String[] generateWebList() {
-        java.util.List<Website> websiteList;
-        websiteList = mainWindow.websiteDao.findAllWebsites();
-        String[] strings = new String[websiteList.size()];
+    private void generateWebList() {
+        java.util.List<Website> list;
+        list = mainWindow.websiteDao.findAllWebsites();
+        String[] strings = new String[list.size()];
         int i = 0;
-        for (Website website : websiteList) {
+        for (Website website : list) {
             strings[i] = website.getTitle();
             i++;
         }
-        return strings;
+        websiteList = strings;
     }
 
     private void generateTextField(int length) {
@@ -225,5 +227,11 @@ public class SearchToolBar extends JToolBar {
     private void addLabel(String find) {
         JLabel label = new JLabel(find);
         add(label);
+    }
+
+    public void revalidateComboBox(){
+        generateWebList();
+        comboBoxWebsites.setModel(new DefaultComboBoxModel<>(websiteList));
+
     }
 }

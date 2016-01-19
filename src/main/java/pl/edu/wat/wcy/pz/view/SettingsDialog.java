@@ -1,18 +1,19 @@
 package pl.edu.wat.wcy.pz.view;
 
-import de.javasoft.plaf.synthetica.*;
 import net.miginfocom.swing.MigLayout;
+import pl.edu.wat.wcy.pz.controller.BrowserSearcher;
 import pl.edu.wat.wcy.pz.model.entities.accounts.User;
 import pl.edu.wat.wcy.pz.model.entities.web.Website;
 
 import javax.swing.*;
+import javax.swing.border.BevelBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.*;
 import java.util.List;
+import java.util.Objects;
 
 public class SettingsDialog extends JDialog {
     private MainWindow mainWindow;
@@ -26,12 +27,19 @@ public class SettingsDialog extends JDialog {
 
     private JComboBox lafComboBox;
     private JTextField titleTextField;
-    private JTextArea titleTextArea;
-    private JTextArea artistTextArea;
+    private JTextField titleUrlTextField;
+    private JTextField artistUrlTextField;
 
+    private JScrollPane listScrollPane;
     private DefaultListModel listModel;
-    private JList list;
+    private JList jList;
     private JTabbedPane urlsTabbedPane;
+    private JButton deleteWebsite;
+    private JButton updateWebsite;
+
+    private int selectedRow = 0;
+
+    private List<Website> actualWebsites;
 
     public SettingsDialog(MainWindow mainWindow) {
         super(mainWindow, "Settings", true);
@@ -58,6 +66,7 @@ public class SettingsDialog extends JDialog {
         okButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                revalidateComboBox();
                 dispose();
             }
         });
@@ -68,10 +77,15 @@ public class SettingsDialog extends JDialog {
         cancelButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                revalidateComboBox();
                 dispose();
             }
         });
         okAndCancelPanel.add(cancelButton, "gapleft 4");
+    }
+
+    private void revalidateComboBox() {
+        mainWindow.searchToolBar.revalidateComboBox();
     }
 
     private void generateTabbedPanePanel() {
@@ -119,19 +133,29 @@ public class SettingsDialog extends JDialog {
         searchOptionsTabbedPane = new JTabbedPane();
         JPanel searchOptions = new JPanel(new BorderLayout());
 
-        JPanel listPanel = new JPanel();
+        JPanel listPanel = new JPanel(new BorderLayout());
+        listPanel.setPreferredSize(new Dimension(140,120));
         generateListModel();
-        list = new JList(listModel);
-        list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        list.setLayoutOrientation(JList.VERTICAL);
-        list.setVisibleRowCount(-1);
-        list.addListSelectionListener(new ListSelectionListener() {
+        jList = new JList(listModel);
+        //jList.setPreferredSize(new Dimension(160,120));
+        jList.setBorder(new BevelBorder(BevelBorder.LOWERED));
+        jList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        jList.setLayoutOrientation(JList.VERTICAL);
+        jList.setVisibleRowCount(-1);
+        jList.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
+                selectedRow = jList.getSelectedIndex();
                 generateTitleArtistAndTitleUrls();
+                deleteWebsite.setEnabled(true);
+                updateWebsite.setEnabled(true);
             }
         });
-        listPanel.add(list);
+
+        listScrollPane = new JScrollPane(jList);
+        listScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+
+        listPanel.add(listScrollPane, BorderLayout.CENTER);
 
 
         JPanel websiteAddPanel = generateWebsiteAddPanel();
@@ -146,18 +170,24 @@ public class SettingsDialog extends JDialog {
     private void generateListModel() {
         listModel = new DefaultListModel();
 
-        java.util.List<Website> websiteList = mainWindow.websiteDao.findAllWebsites();
-        for (Website website : websiteList) {
+        actualWebsites = mainWindow.websiteDao.findAllWebsites();
+        for (Website website : actualWebsites) {
             listModel.addElement(website.getTitle());
         }
     }
 
     private void generateTitleArtistAndTitleUrls() {
-        List<Website> websiteList = mainWindow.websiteDao.findAllWebsites();
-        titleTextField.setText(websiteList.get(list.getSelectedIndex()).getTitle());
-
-        titleTextArea.setText(websiteList.get(list.getSelectedIndex()).getUrlTitle());
-        titleTextArea.setText(websiteList.get(list.getSelectedIndex()).getUrlArtist());
+        actualWebsites = mainWindow.websiteDao.findAllWebsites();
+        System.out.println("selectedRow:" + selectedRow);
+        if(selectedRow == -1){
+            titleTextField.setText("");
+            titleUrlTextField.setText("");
+            titleUrlTextField.setText("");
+        }else{
+            titleTextField.setText(actualWebsites.get(selectedRow).getTitle());
+            titleUrlTextField.setText(actualWebsites.get(selectedRow).getUrlTitle());
+            titleUrlTextField.setText(actualWebsites.get(selectedRow).getUrlArtist());
+        }
     }
 
     private JPanel generateUpdateWebsitePanel() {
@@ -167,11 +197,20 @@ public class SettingsDialog extends JDialog {
         JLabel labelSearchURL = new JLabel("Search URLs:");
         urlsTabbedPane = new JTabbedPane();
 
-        titleTextArea = new JTextArea();
-        artistTextArea = new JTextArea();
+        int textFieldsLength = 26;
+        titleUrlTextField = new JTextField(textFieldsLength);
+        artistUrlTextField = new JTextField(textFieldsLength);
 
-        urlsTabbedPane.addTab("Title", titleTextArea);
-        urlsTabbedPane.addTab("Artist", artistTextArea);
+        JPanel titlePanel = new JPanel();
+        titlePanel.setLayout(new MigLayout());
+        titlePanel.add(titleUrlTextField);
+
+        JPanel artistPanel = new JPanel();
+        artistPanel.setLayout(new MigLayout());
+        artistPanel.add(artistUrlTextField);
+
+        urlsTabbedPane.addTab("Title", titlePanel);
+        urlsTabbedPane.addTab("Artist", artistPanel);
 
         panel.add(label, "wrap");
         panel.add(titleTextField, "wrap");
@@ -193,47 +232,66 @@ public class SettingsDialog extends JDialog {
     private JPanel generateWebsiteAddPanel() {
         JPanel panel = new JPanel(new MigLayout());
 
-        JButton newWebsite = new JButton();  //TODO icon
+        JButton newWebsite = new JButton();
         newWebsite.setText("New");
+        newWebsite.setIcon(new ImageIcon("src/images/plusIcon.png"));
         newWebsite.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
+                if(Objects.equals(titleTextField.getText(), "")){
+                    JOptionPane.showMessageDialog(titleTextField, "Set title.");
+                }
+                Website website = new Website();
+                website.setTitle(titleTextField.getText());
+                website.setUrlTitle(titleUrlTextField.getText());
+                website.setUrlArtist(artistUrlTextField.getText());
+                website.setUser(mainWindow.actualUser);
+                mainWindow.websiteDao.create(website);
+                revalidateList();
             }
         });
 
-        JButton deleteWebsite = new JButton();
+        deleteWebsite = new JButton();
         deleteWebsite.setText("Delete");
+        deleteWebsite.setEnabled(false);
+        deleteWebsite.setIcon(new ImageIcon("src/images/cancelIcon.png"));
         deleteWebsite.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
+                mainWindow.websiteDao.delete(actualWebsites.get(selectedRow).getId());
+                deleteWebsite.setEnabled(false);
+                updateWebsite.setEnabled(false);
+                revalidateList();
             }
         });
 
-        JButton upWebsite = new JButton();
-        upWebsite.setText("Up");
-        upWebsite.addActionListener(new ActionListener() {
+
+        updateWebsite = new JButton();
+        updateWebsite.setText("Update");
+        updateWebsite.setEnabled(false);
+        updateWebsite.setIcon(new ImageIcon("src/images/updateIcon.png"));
+        updateWebsite.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
-            }
-        });
-
-        JButton downWebsite = new JButton();
-        downWebsite.setText("Down");
-        upWebsite.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-
+                actualWebsites.get(selectedRow).setTitle(titleTextField.getText());
+                actualWebsites.get(selectedRow).setUrlTitle(titleUrlTextField.getText());
+                actualWebsites.get(selectedRow).setUrlArtist(artistUrlTextField.getText());
+                mainWindow.websiteDao.update(actualWebsites.get(selectedRow));
+                revalidateList();
             }
         });
 
         panel.add(newWebsite, "wrap");
         panel.add(deleteWebsite, "wrap");
-        panel.add(upWebsite, "wrap");
-        panel.add(downWebsite, "wrap");
+        panel.add(updateWebsite, "wrap");
         return panel;
+    }
+
+    private void revalidateList() {
+        generateListModel();
+        jList.setModel(listModel);
+        deleteWebsite.setEnabled(false);
+        updateWebsite.setEnabled(false);
     }
 
     private void generateBasicOptionsTabbedPane() {
@@ -241,7 +299,17 @@ public class SettingsDialog extends JDialog {
         JPanel licensePanel = new JPanel();
         basicOptionsTabbedPane.addTab("License", licensePanel);
 
+        JButton buyLicense = new JButton("Buy License");
+        buyLicense.setIcon(new ImageIcon("src/images/cashIcon.png"));
+        buyLicense.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                BrowserSearcher browserSearcher = new BrowserSearcher(mainWindow);
+                browserSearcher.openUrl("http://localhost:8080/");
+            }
+        });
 
+        licensePanel.add(buyLicense);
     }
 
     private void generateButtonsPanel() {
