@@ -1,37 +1,37 @@
-package pl.edu.wat.wcy.pz.controller;
+package pl.edu.wat.wcy.pz.view.bluePlayer;
 
-import javazoom.jlgui.basicplayer.*;
 
-import javax.swing.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Map;
 
+import javazoom.jlgui.basicplayer.BasicController;
+import javazoom.jlgui.basicplayer.BasicPlayer;
+import javazoom.jlgui.basicplayer.BasicPlayerEvent;
+import javazoom.jlgui.basicplayer.BasicPlayerException;
+import javazoom.jlgui.basicplayer.BasicPlayerListener;
+
 public class AudioPlayer extends BasicPlayer {
-	private String songPath;
 	
 	//Extension of BasicPlayer
 	private static AudioPlayer instance = null;
+	private ArrayList<String> playlist = new ArrayList<String>();
 	private int index = 0;
 	private boolean paused = true;
 	private boolean opened = false;
 	private boolean isSeeking = false;
 	public boolean isStoped = true;
-	
-	//Current Audio Properties
+
 	private float audioDurationInSeconds = 0;
 	private int audioFrameSize = 0;
 	private float audioFrameRate = 0;
-	//Stream info/status
+
 	private byte[] cpcmdata;
-	private long csms = 0; //Current Song microseconds
-	private int lastSeekMs = 0; //Every time we seek, basic player returns microseconds are resetted
-	//we need a var to mantain the position we seeked to
-	
-	//Want to use a singleton
+	private long currentSongMs = 0;
+	private int lastSeekMs = 0;
+
 	private AudioPlayer() {
 		super();
-		//Wanna give the AudioPlayer class a basic behaviour
 		this.addBasicPlayerListener(new BasicPlayerListener() {
 			
 			@Override
@@ -39,7 +39,7 @@ public class AudioPlayer extends BasicPlayer {
 				if(event.getCode() == BasicPlayerEvent.EOM)
 				{
 					lastSeekMs = 0;
-					paused = true; //reset player state
+					paused = true;
 					opened = false;
 				}
 				if(event.getCode() == BasicPlayerEvent.SEEKING)
@@ -50,12 +50,12 @@ public class AudioPlayer extends BasicPlayer {
 			
 			@Override
 			public void setController(BasicController arg0) {
-				//No need to use this
+
 			}
 			
 			@Override
 			public void progress(int bytesread, long microseconds, byte[] pcmdata, Map properties) {
-				csms = microseconds;
+				currentSongMs = microseconds;
 				cpcmdata = pcmdata;
 			}
 			
@@ -67,14 +67,17 @@ public class AudioPlayer extends BasicPlayer {
 				for(int i = 0; i<properties.size(); i++){
 					line += "\n\t" + k[i] + ":" + e[i];
 				}
+				log(line);
 				//Set Audio Properties
-				File file = new File(songPath);
+				File file = new File(playlist.get(index));
 			    long audioFileLength = file.length();
 				int frameSize = (int) properties.get("mp3.framesize.bytes");
 			    float frameRate = (float) properties.get("mp3.framerate.fps");
 			    audioFrameSize = frameSize;
 			    audioFrameRate = frameRate;
 			    audioDurationInSeconds = (audioFileLength / (frameSize * frameRate));
+			    log("\tframesize " + frameSize + " framerate " + frameRate);
+			    log("\tAudio File lenght in seconds is: " + audioDurationInSeconds);
 			}
 		});
 	}
@@ -88,25 +91,30 @@ public class AudioPlayer extends BasicPlayer {
 	
 	
 	@Override
-	public void play(){
-		try {
-			if(!paused || !opened){
-				File f = new File(songPath);
-					open(f);
-				opened = true;
-				super.play();
-			}
-			if(paused)
-				super.resume();
-			paused = false;
-			isStoped = false;
-		} catch (BasicPlayerException e) {
-			JOptionPane.showMessageDialog(null, "Wrong song path.");
+	public void play() throws BasicPlayerException {
+		if(playlist.size() == 0)
+			return;
+		if(!paused || !opened){
+			File f = new File(playlist.get(index));
+			log("Opening file... " + f.getAbsolutePath());
+			open(f);
+			opened = true;
+			super.play();
 		}
+		if(paused){
+			for (String s : playlist) {
+				System.out.println(s);
+			}
+			super.resume();
+		}
+
+		paused = false;
+		isStoped = false;
 	}
 	
 	@Override
 	public void pause() throws BasicPlayerException {
+		log("Paused");
 		paused = true;
 		isStoped = false;
 		super.pause();
@@ -122,33 +130,68 @@ public class AudioPlayer extends BasicPlayer {
 	public boolean isPaused(){ return paused; }
 	
 	public boolean isOpenFile() { return opened; }
-
+	
+	public ArrayList<String> getPlaylist(){ return playlist; }
+	
 	public int getIndexSong(){ return index; }
 	
 	public void setIndexSong(int index){ this.index = index; lastSeekMs = 0; }
 	
 	public boolean isSeeking() { return isSeeking; }
+
+	public void nextSong() throws BasicPlayerException {
+		if(playlist.size() == 0)
+			return;
+		lastSeekMs = 0;
+		paused = false;
+		index = (index+1)%playlist.size();
+		play();
+	}
+
+	public void prvSong() throws BasicPlayerException {
+		if(playlist.size() == 0)
+			return;
+		lastSeekMs = 0;
+		paused = false;
+		index = (index-1)%playlist.size();
+		play();
+	}
+
+	public void addSong(String songPath) {
+		playlist.add(songPath);
+	}
+
+	public void removeSong(int index) {
+		playlist.remove(index);
+	}
+
+	public void removeSong(String songPath)
+	{
+		playlist.remove(songPath);
+	}
 	
-	public byte[] getPcmData(){return cpcmdata;}
+	public byte[] getPcmData(){
+		return cpcmdata;}
 	
-	public long getProgressMicroseconds(){return csms+lastSeekMs;}
+	public long getProgressMicroseconds(){
+		return currentSongMs +lastSeekMs;}
 	
-	public float getAudioDurationSeconds() {return audioDurationInSeconds;}
+	public float getAudioDurationSeconds() {
+		return audioDurationInSeconds;}
 	
-	public float getAudioFrameRate() { return audioFrameRate; }
+	public float getAudioFrameRate() {
+		return audioFrameRate; }
 	
-	public float getAudioFrameSize() { return audioFrameSize; }
-	
-	/**
-	 * Remembers what's the last position relative to the playing song
-	 * when seeking
-	 */
+	public float getAudioFrameSize() {
+		return audioFrameSize; }
+
 	public void setLastSeekPositionInMs(int seekMs)
 	{
 		lastSeekMs = seekMs;
 	}
 
-	public void setSongPath(String songPath) {
-		this.songPath = songPath;
+	private void log(String line)
+	{
+		System.out.println("AudioPlayer] " + line);
 	}
 }

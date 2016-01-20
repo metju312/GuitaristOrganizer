@@ -213,6 +213,8 @@ public class SongsPanel extends JPanel {
                 mainWindow.tablePanel.setCoverListModel(mainWindow.coversPanel.coverList);
                 mainWindow.tabsPanel.revalidateWithEmptyList();
                 mainWindow.tabsPanel.addTabButton.setEnabled(false);
+
+                mainWindow.tablePanel.typeOfTable = 2;
             }
         });
 

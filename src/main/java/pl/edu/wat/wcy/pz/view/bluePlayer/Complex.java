@@ -1,4 +1,4 @@
-package pl.edu.wat.wcy.pz.controller;
+package pl.edu.wat.wcy.pz.view.bluePlayer;
 
 //Below is Complex.java from §9.7 Data Analysis.
 

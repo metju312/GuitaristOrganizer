@@ -185,6 +185,8 @@ public class CoversPanel extends JPanel {
                 mainWindow.tabsPanel.setTabListWithCover(jList.getSelectedValue().toString());
                 mainWindow.tablePanel.setTabListModel(mainWindow.tabsPanel.tabList);
                 mainWindow.tabsPanel.addTabButton.setEnabled(true);
+
+                mainWindow.tablePanel.typeOfTable = 3;
             }
         });
 

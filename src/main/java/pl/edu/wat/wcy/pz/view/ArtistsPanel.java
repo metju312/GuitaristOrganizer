@@ -59,7 +59,11 @@ public class ArtistsPanel extends JPanel {
         updateMenuItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new UpdateArtistDialog(mainWindow, artistList.get(selectedRow));
+                if(selectedRow == 0 || selectedRow == 1){
+                    JOptionPane.showMessageDialog(updateMenuItem, "Can not update this Artist.");
+                }else{
+                    new UpdateArtistDialog(mainWindow, artistList.get(selectedRow));
+                }
             }
         });
 
@@ -173,6 +177,8 @@ public class ArtistsPanel extends JPanel {
                 mainWindow.coversPanel.addCoverButton.setEnabled(false);
                 mainWindow.songsPanel.addSongButton.setEnabled(true);
                 mainWindow.tabsPanel.addTabButton.setEnabled(false);
+
+                mainWindow.tablePanel.typeOfTable = 1;
             }
         });
 

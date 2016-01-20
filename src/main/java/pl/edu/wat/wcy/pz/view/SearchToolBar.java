@@ -149,8 +149,10 @@ public class SearchToolBar extends JToolBar {
     private void afterWriteInTextFieldMethod() {
         if(comboBoxTitleAndArtist.getSelectedIndex() == 0){
             selectTitlesLike(textField.getText());
+            mainWindow.tablePanel.typeOfTable = 1;
         }else{
             selectTitlesWhereArtistLike(textField.getText());
+            mainWindow.tablePanel.typeOfTable = 1;
         }
     }
 

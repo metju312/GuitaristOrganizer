@@ -4,7 +4,6 @@ import javazoom.jlgui.basicplayer.BasicController;
 import javazoom.jlgui.basicplayer.BasicPlayerEvent;
 import javazoom.jlgui.basicplayer.BasicPlayerException;
 import javazoom.jlgui.basicplayer.BasicPlayerListener;
-import pl.edu.wat.wcy.pz.controller.AudioPlayer;
 import pl.edu.wat.wcy.pz.view.TablePanel;
 
 import javax.swing.*;
@@ -43,6 +42,7 @@ public class BluePlayer extends JFrame {
     private JSplitPane verticalSplitPane;
 
 
+    private int index = 0;
     public BluePlayer(String title, TablePanel tablePanel) throws HeadlessException, BasicPlayerException {
         super(title);
         this.tablePanel = tablePanel;
@@ -78,7 +78,8 @@ public class BluePlayer extends JFrame {
     public void startPlay(String songPath) {
         this.songPath = songPath;
 
-        player.setSongPath(this.songPath);
+        player.addSong(songPath);
+        player.setIndexSong(index);
         try {
             player.stop();
             player.play();
@@ -86,6 +87,7 @@ public class BluePlayer extends JFrame {
             e.printStackTrace();
         }
         player.setLastSeekPositionInMs(0);
+        index++;
     }
 
     private void generatePlayer() throws BasicPlayerException {
@@ -93,32 +95,16 @@ public class BluePlayer extends JFrame {
         player.addBasicPlayerListener(new BasicPlayerListener() {
             @Override
             public void stateUpdated(BasicPlayerEvent event) {
-//                if(event.getCode() == BasicPlayerEvent.EOM)
-//                {
-//                    //seekbar.resetLastSeek();
-//                    try {
-//                        player.nextSong();
-//                    } catch (BasicPlayerException e) {
-//                        e.printStackTrace();
-//                    }
-//                    log("EOM event catched, calling next song.");
-//                }
-//                if(event.getCode() == BasicPlayerEvent.PAUSED){
-//                    //btnPlay.setText(">");
-//                    btnPlay.setIcon(playIcon);
-//                }
-//                if(event.getCode() == BasicPlayerEvent.RESUMED){
-//                    //btnPlay.setText("||");
-//                    btnPlay.setIcon(pauseIcon);
-//                }
+
             }
 
             @Override
-            public void setController(BasicController arg0) {}
+            public void setController(BasicController arg0) {
+
+            }
 
             @Override
             public void progress(int bytesread, long microseconds, byte[] pcmdata, Map properties) {
-                //we don't want to use microseconds directly because it gets resetted on seeking
                 seekbar.updateSeekBar(player.getProgressMicroseconds(), currentAudioDurationSec);
                 if(wff != null)
                     wff.updateWave(pcmdata);
@@ -166,7 +152,7 @@ public class BluePlayer extends JFrame {
                     }
                     else{
                         player.stop();
-                        player.setSongPath(songPath);
+                        player.addSong(songPath);
                         player.play();
                     }
                 } catch (BasicPlayerException e1) {
@@ -211,15 +197,20 @@ public class BluePlayer extends JFrame {
     }
 
     public void playClicked() throws BasicPlayerException {
+//        if(!player.isPaused()){
+//            player.pause();
+//        }
+//        else{player.play();}
+
+
+
         if(player.isStoped){
-            player.setSongPath(songPath);
             player.play();
         }else{
             if(!player.isPaused()){
                 player.pause();
             }
             else{
-                player.setSongPath(songPath);
                 player.play();
             }
         }
@@ -227,12 +218,14 @@ public class BluePlayer extends JFrame {
 
     private void generateFFTParallelPanel() {
         fdf = new FFTParallelPanel();
-        wff.setPreferredSize(new Dimension(windowWidth,windowHeight-400));
+        fdf.setVisible(true);
+       // wff.setPreferredSize(new Dimension(windowWidth,windowHeight-400));
     }
 
     private void generateWaveformPanel() {
         wff = new WaveformParallelPanel();
-        wff.setPreferredSize(new Dimension(windowWidth,windowHeight-400));
+        //wff.setPreferredSize(new Dimension(windowWidth,windowHeight-400));
+        wff.setVisible(true);
     }
 
     private void setIcon() {

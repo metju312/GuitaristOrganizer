@@ -1,5 +1,4 @@
-package pl.edu.wat.wcy.pz.controller;
-
+package pl.edu.wat.wcy.pz.view.bluePlayer;
 
 public class Utils {
 	/**

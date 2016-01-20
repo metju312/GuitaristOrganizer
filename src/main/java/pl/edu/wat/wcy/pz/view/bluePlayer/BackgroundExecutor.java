@@ -1,4 +1,4 @@
-package pl.edu.wat.wcy.pz.controller;
+package pl.edu.wat.wcy.pz.view.bluePlayer;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;

@@ -1,12 +1,12 @@
 package pl.edu.wat.wcy.pz.view.bluePlayer;
 
-import javazoom.jlgui.basicplayer.BasicPlayerException;
-import pl.edu.wat.wcy.pz.controller.AudioPlayer;
-import pl.edu.wat.wcy.pz.controller.BackgroundExecutor;
-
-import javax.swing.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+
+import javax.swing.JProgressBar;
+import javax.swing.SwingUtilities;
+
+import javazoom.jlgui.basicplayer.BasicPlayerException;
 
 public class SeekBar extends JProgressBar {
 
@@ -27,7 +27,7 @@ public class SeekBar extends JProgressBar {
 	{
 		if(p.isSeeking())
 			return;
-		BackgroundExecutor.get().execute(new UpdatingTask(progress, totalVal));
+		BackgroundExecutor.get().execute(new UpdatingTask(progress, totalVal)); 
 		setValue(updatedValue);
 		//log("Seek val : "+n + " " + lp +" t:" + totalVal + " sl:" + seekLenght);
 	}

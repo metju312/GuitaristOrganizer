@@ -30,10 +30,6 @@ public class TablePanel extends JPanel implements ActionListener {
     private JScrollPane listScroller;
     private JToolBar toolBar;
 
-
-
-
-
     private JTable table;
 
     public JLabel toolBarLabel;
@@ -57,6 +53,8 @@ public class TablePanel extends JPanel implements ActionListener {
     private List<Cover> actualCoverList;
     private List<Tab> actualTabList;
     private int selectedRow;
+
+    public int typeOfTable = 0; //0 -empty //1songs //2covers //3tabs
 
     public TablePanel(MainWindow mainWindow) {
         this.mainWindow = mainWindow;
@@ -152,11 +150,6 @@ public class TablePanel extends JPanel implements ActionListener {
         popupMenu.add(urlSearch);
     }
 
-    private void generateTable() {
-        table = new JTable();
-        table.setAutoCreateRowSorter(true);
-    }
-
     private void generateAndAddToolBar() {
         toolBar = new JToolBar("Still draggable");
         toolBarLabel = new JLabel("Songs");
@@ -170,10 +163,9 @@ public class TablePanel extends JPanel implements ActionListener {
         //listScroller.setPreferredSize(new Dimension(100, 200));
         add(listScroller);
     }
-
-    public void setSongListModel(List<Song> songs){
-        actualSongList = songs;
-        table.setModel(new SongsTableModel(songs));
+    private void generateTable() {
+        table = new JTable();
+        table.setAutoCreateRowSorter(true);
         table.addMouseListener(new MouseAdapter() {
             public void mouseReleased(MouseEvent e) {
                 if (e.isPopupTrigger()) {
@@ -182,9 +174,20 @@ public class TablePanel extends JPanel implements ActionListener {
                     int column = source.columnAtPoint(e.getPoint());
                     selectedRow = row;
 
-                    urlToOpen = actualSongList.get(row).getUrl();
-                    titleToWebSearch = actualSongList.get(row).getTitle();
-                    pathToOpen = actualSongList.get(row).getPath();
+                    if(typeOfTable == 1){
+                        urlToOpen = actualSongList.get(row).getUrl();
+                        titleToWebSearch = actualSongList.get(row).getTitle();
+                        pathToOpen = actualSongList.get(row).getPath();
+                    }else if(typeOfTable == 2){
+                        urlToOpen = actualCoverList.get(row).getUrl();
+                        titleToWebSearch = actualCoverList.get(row).getTitle();
+                        pathToOpen = actualCoverList.get(row).getPath();
+                    }else if(typeOfTable ==3){
+                        urlToOpen = actualTabList.get(row).getUrl();
+                        titleToWebSearch = actualTabList.get(row).getTitle();
+                        pathToOpen = actualTabList.get(row).getPath();
+
+                    }
 
                     if (!source.isRowSelected(row))
                         source.changeSelection(row, column, false, false);
@@ -193,54 +196,21 @@ public class TablePanel extends JPanel implements ActionListener {
                 }
             }
         });
+    }
+
+    public void setSongListModel(List<Song> songs){
+        actualSongList = songs;
+        table.setModel(new SongsTableModel(songs));
     }
 
     public void setCoverListModel(List<Cover> covers){
         actualCoverList = covers;
         table.setModel(new CoversTableModel(covers));
-        table.addMouseListener(new MouseAdapter() {
-            public void mouseReleased(MouseEvent e) {
-                if (e.isPopupTrigger()) {
-                    JTable source = (JTable) e.getSource();
-                    int row = source.rowAtPoint(e.getPoint());
-                    int column = source.columnAtPoint(e.getPoint());
-                    selectedRow = row;
-
-                    urlToOpen = actualCoverList.get(row).getUrl();
-                    titleToWebSearch = actualCoverList.get(row).getTitle();
-                    pathToOpen = actualCoverList.get(row).getPath();
-
-                    if (!source.isRowSelected(row))
-                        source.changeSelection(row, column, false, false);
-
-                    popupMenu.show(e.getComponent(), e.getX(), e.getY());
-                }
-            }
-        });
     }
 
     public void setTabListModel(List<Tab> tabs){
         actualTabList = tabs;
         table.setModel(new TabsTableModel(tabs));
-        table.addMouseListener(new MouseAdapter() {
-            public void mouseReleased(MouseEvent e) {
-                if (e.isPopupTrigger()) {
-                    JTable source = (JTable) e.getSource();
-                    int row = source.rowAtPoint(e.getPoint());
-                    int column = source.columnAtPoint(e.getPoint());
-                    selectedRow = row;
-
-                    urlToOpen = actualTabList.get(row).getUrl();
-                    titleToWebSearch = actualTabList.get(row).getTitle();
-                    pathToOpen = actualTabList.get(row).getPath();
-
-                    if (!source.isRowSelected(row))
-                        source.changeSelection(row, column, false, false);
-
-                    popupMenu.show(e.getComponent(), e.getX(), e.getY());
-                }
-            }
-        });
     }
 
     @Override
